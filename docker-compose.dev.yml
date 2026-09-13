@@ -1,0 +1,28 @@
+# Local development: Postgres only.
+#
+# The worker, web and agent run on the host in development, so this publishes
+# 5432 to localhost. The deployed stack does the opposite — see
+# docker-compose.yml, where Postgres has no published port at all.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-baton}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-baton}
+      POSTGRES_DB: ${POSTGRES_DB:-baton}
+    ports:
+      # Bound to the loopback interface explicitly, not 0.0.0.0, so a dev machine
+      # on a shared network does not expose the database.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - baton-pg-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-baton} -d ${POSTGRES_DB:-baton}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  baton-pg-dev:

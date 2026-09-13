@@ -1,0 +1,86 @@
+# Deployment stack for Coolify.
+#
+# Deploy this as a Coolify **Docker Compose** resource, not as separate
+# Application resources. This is not a convenience choice.
+#
+# Coolify applies rolling updates to Application resources: the replacement
+# container starts, and the old one stops once it is considered healthy. Either
+# way there is a window in which two worker containers run at once — and two
+# getUpdates consumers on one bot token split the update stream unpredictably
+# between them. During a deploy the bot would answer some messages and silently
+# drop others, with nothing in either log looking wrong. Coolify does not roll
+# Compose deployments, so this gives stop-then-start semantics for free.
+#
+# If web and worker are ever split into separate Application resources, the
+# worker specifically must have rolling updates DISABLED. That constraint is
+# invisible in the code and will otherwise be removed as dead configuration.
+#
+# There is no reverse proxy here. Coolify's proxy owns ports 80 and 443, issues
+# Let's Encrypt certificates from each resource's domain field, and routes to
+# these containers. A second proxy would fight it for the bind.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB}
+    # NO `ports:` KEY. Postgres is reachable over the Docker network by worker
+    # and web, and by `docker exec` for pg_dump, and by nothing else. Coolify
+    # exposes a public-port toggle for database resources, so verify this from
+    # outside the VM rather than trusting the topology diagram.
+    volumes:
+      - baton-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  worker:
+    build:
+      # Repository root as context, because packages/core is a workspace
+      # dependency and a context of apps/worker cannot see it.
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?set TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:?set TELEGRAM_CHAT_ID}
+      COORDINATOR_TELEGRAM_ID: ${COORDINATOR_TELEGRAM_ID:?set COORDINATOR_TELEGRAM_ID}
+      AGENT_TRANSPORT: agentcore
+      AGENTCORE_RUNTIME_ARN: ${AGENTCORE_RUNTIME_ARN:?set AGENTCORE_RUNTIME_ARN}
+      AWS_REGION: ${AWS_REGION:?set AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?set AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?set AWS_SECRET_ACCESS_KEY}
+      DATA_API_TOKEN: ${DATA_API_TOKEN:?set DATA_API_TOKEN}
+      ORG_TIMEZONE: ${ORG_TIMEZONE:-Asia/Kolkata}
+      PORT: 8081
+    # Coolify routes the data API to this port from the domain configured in its
+    # UI. /health is on the same port but must not be published publicly.
+    expose:
+      - "8081"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      ADMIN_PASSCODE: ${ADMIN_PASSCODE:?set ADMIN_PASSCODE}
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET}
+    expose:
+      - "3000"
+
+volumes:
+  baton-pg:

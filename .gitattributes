@@ -1,0 +1,21 @@
+# Normalise to LF everywhere.
+#
+# Prettier is configured with endOfLine: "lf". Without this file, git on Windows
+# checks files out as CRLF, and `pnpm format` then fails on a fresh clone for
+# every file in the repository — a confusing first experience that looks like a
+# broken config rather than a line-ending mismatch.
+* text=auto eol=lf
+
+# Binary, never normalised.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.pdf binary
+*.mp4 binary
+*.dump binary
+*.pgdump binary
+
+# Generated; keep diffs collapsed in review.
+pnpm-lock.yaml linguist-generated=true -diff

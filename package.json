@@ -1,0 +1,41 @@
+{
+  "name": "baton",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Baton remembers everything a volunteer group knows, so no one person has to.",
+  "license": "MIT",
+  "author": "Rajath Gatty",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "typecheck": "pnpm -r --stream typecheck",
+    "build": "pnpm -r --stream build",
+    "test": "pnpm -r --stream test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "db:generate": "pnpm --filter @baton/core db:generate",
+    "db:migrate": "pnpm --filter @baton/core db:migrate",
+    "pg:up": "docker compose -f docker-compose.dev.yml up -d",
+    "pg:down": "docker compose -f docker-compose.dev.yml down",
+    "seed:plan": "pnpm --filter @baton/scripts seed:plan",
+    "seed:transcript": "pnpm --filter @baton/scripts seed:transcript",
+    "backfill": "pnpm --filter @baton/scripts backfill",
+    "reset:demo": "pnpm --filter @baton/scripts reset:demo"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.1",
+    "@types/node": "22.19.1",
+    "eslint": "9.39.1",
+    "eslint-config-prettier": "10.1.8",
+    "prettier": "3.6.2",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.46.0",
+    "vitest": "3.2.4"
+  }
+}

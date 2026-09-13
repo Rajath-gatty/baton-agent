@@ -1,0 +1,21 @@
+{
+  "name": "@baton/scripts",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --build",
+    "seed:plan": "tsx seed-plan.ts",
+    "seed:transcript": "tsx seed-transcript.ts",
+    "backfill": "tsx backfill.ts",
+    "reset:demo": "tsx reset-demo.ts",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@baton/core": "workspace:*",
+    "drizzle-orm": "0.44.6",
+    "postgres": "3.4.7",
+    "zod": "3.25.76"
+  }
+}
