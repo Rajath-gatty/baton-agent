@@ -1,0 +1,29 @@
+# Private planning docs — the specs are working documents, not submission material.
+# Anything intended for judges lives outside these paths: README.md, ARCHITECTURE.md.
+# docs/superpowers/
+docs/hackathon-ideas.json
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Dependencies and build output
+node_modules/
+.pnpm-store/
+dist/
+build/
+out/
+.next/
+*.tsbuildinfo
+
+# Database dumps — never the Drizzle migrations, which must be committed
+*.dump
+*.pgdump
+dumps/
+golden.sql
+
+# Editor and OS
+.DS_Store
+Thumbs.db

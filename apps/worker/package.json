@@ -1,0 +1,25 @@
+{
+  "name": "@baton/worker",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --build",
+    "build": "tsc --build",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-agentcore": "3.917.0",
+    "@baton/core": "workspace:*",
+    "drizzle-orm": "0.44.6",
+    "express": "5.1.0",
+    "postgres": "3.4.7",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.1"
+  }
+}

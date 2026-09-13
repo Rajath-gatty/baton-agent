@@ -1,0 +1,43 @@
+{
+  "name": "@baton/core",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "//": "Exports point at dist, not src, because apps/worker and apps/web run as `node dist/main.js` in their containers. Consequence: core must be built before the apps run, which tsc project references handle for typecheck and the Dockerfiles handle for runtime.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./db": {
+      "types": "./dist/db/index.d.ts",
+      "default": "./dist/db/index.js"
+    },
+    "./schemas": {
+      "types": "./dist/schemas/index.d.ts",
+      "default": "./dist/schemas/index.js"
+    },
+    "./prompts": {
+      "types": "./dist/prompts/index.d.ts",
+      "default": "./dist/prompts/index.js"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --build",
+    "build": "tsc --build",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.44.6",
+    "postgres": "3.4.7",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.5"
+  }
+}

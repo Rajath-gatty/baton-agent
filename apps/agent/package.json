@@ -1,0 +1,23 @@
+{
+  "name": "@baton/agent",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --build",
+    "build": "tsc --build",
+    "test": "vitest run --passWithNoTests"
+  },
+  "//": "No database client here, by design. The AgentCore container holds no database credentials, and the root ESLint config fails on any import of pg, postgres, drizzle-orm or @baton/core/db.",
+  "dependencies": {
+    "@baton/core": "workspace:*",
+    "express": "5.1.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.1"
+  }
+}
