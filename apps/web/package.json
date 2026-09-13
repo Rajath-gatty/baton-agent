@@ -13,11 +13,14 @@
   },
   "dependencies": {
     "@baton/core": "workspace:*",
+    "@tailwindcss/postcss": "4.3.3",
     "drizzle-orm": "0.44.6",
+    "jose": "6.2.12",
     "next": "15.5.4",
     "postgres": "3.4.7",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "tailwindcss": "4.3.3"
   },
   "devDependencies": {
     "@types/react": "19.2.2",

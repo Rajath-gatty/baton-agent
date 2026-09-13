@@ -3,6 +3,8 @@
 # docs/superpowers/
 docs/hackathon-ideas.json
 
+.codegraph
+
 # Environment and secrets
 .env
 .env.local
@@ -34,3 +36,4 @@ golden.sql
 # Editor and OS
 .DS_Store
 Thumbs.db
+

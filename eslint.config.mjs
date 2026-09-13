@@ -10,6 +10,7 @@ export default tseslint.config(
       "**/dist/**",
       "**/build/**",
       "**/.next/**",
+      "**/next-env.d.ts",
       "**/drizzle/**",
       "**/*.config.js",
       "**/*.config.mjs",
