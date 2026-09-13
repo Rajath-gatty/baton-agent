@@ -1,0 +1,311 @@
+@import "tailwindcss";
+
+/*
+ * Baton — the visual world.
+ *
+ * Indian railway status notation. The register is read as a reservation chart:
+ * a newsprint-grey sheet, hairline rules, condensed board lettering, and a
+ * right-aligned column of tabular status codes. The deliberate refusal is the
+ * dark alerting console with red severity chips — that world would make a
+ * continuity register read as surveillance, which the product forbids in
+ * substance, not only in tone.
+ *
+ * Colour strategy: Restrained. Neutrals plus one signage blue, which is spent
+ * only on primary action and current selection. Status colours are a semantic
+ * vocabulary, not decoration.
+ *
+ * Light, not dark: the reader is a tired coordinator in a lit room at the end of
+ * a working day, and this must feel like a document rather than a monitor.
+ */
+
+@theme {
+  /* Ground and ink. Grey-green newsprint, deliberately not cream — cream plus a
+     serif is the default this world exists to avoid. */
+  --color-paper: #eceeeb;
+  --color-sheet: #fbfcfa;
+  --color-sheet-alt: #f4f6f2;
+  --color-board: #1a1f21;
+  --color-board-ink: #e8ebe6;
+
+  --color-ink: #16191b;
+  --color-ink-muted: #5c666c;
+  --color-ink-faint: #8a9298;
+
+  --color-rule: #d2d8d3;
+  --color-rule-strong: #a7afa8;
+
+  /* The single accent. Primary action, current selection, focus. */
+  --color-signal: #123e6e;
+  --color-signal-hover: #0d2f56;
+  --color-signal-soft: #e4ebf2;
+
+  /* Status vocabulary — the product's own, from core's FACT_STATUSES. Not a
+     borrowed notation: these are the five states a claim can actually be in. */
+  --color-status-active: #1f5d40;
+  --color-status-unverified: #8a5a12;
+  --color-status-held: #8c3a22;
+  --color-status-closed: #6b7278;
+
+  --font-sans:
+    var(--font-barlow), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-board: var(--font-barlow-condensed), var(--font-barlow), ui-sans-serif, sans-serif;
+
+  /* Fixed rem scale at a ~1.2 ratio. Not fluid: product UI is read at a
+     consistent DPI, and a clamped heading that shrinks inside a panel looks
+     worse rather than more responsive. */
+  --text-label: 0.6875rem;
+  --text-meta: 0.75rem;
+  --text-dense: 0.8125rem;
+  --text-body: 0.875rem;
+  --text-lead: 1rem;
+  --text-sub: 1.25rem;
+  --text-head: 1.5rem;
+  --text-state: 1.9375rem;
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+  }
+
+  body {
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.45;
+    /* Numbers sit in columns everywhere in this product. */
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* One visible focus treatment for the whole app. */
+  :focus-visible {
+    outline: 2px solid var(--color-signal);
+    outline-offset: 2px;
+    border-radius: 1px;
+  }
+
+  ::selection {
+    background: var(--color-signal-soft);
+  }
+
+  /* Motion conveys state only, 150–250ms. No page-load choreography: the
+     coordinator is loading into a task, not watching an intro. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* ── the sheet ─────────────────────────────────────────────────────────── */
+
+  .sheet {
+    background: var(--color-sheet);
+    border: 1px solid var(--color-rule);
+    border-radius: 2px;
+  }
+
+  /* ── board lettering ───────────────────────────────────────────────────── */
+
+  .board-type {
+    font-family: var(--font-board);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .eyebrow {
+    font-family: var(--font-board);
+    font-size: var(--text-label);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+
+  /* ── status codes ──────────────────────────────────────────────────────── */
+
+  .code {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    padding: 0.0625rem 0.3125rem;
+    border: 1px solid currentColor;
+    border-radius: 1px;
+    font-family: var(--font-board);
+    font-size: var(--text-label);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+  }
+
+  .code-active {
+    color: var(--color-status-active);
+  }
+  .code-unverified {
+    color: var(--color-status-unverified);
+  }
+  .code-held {
+    color: var(--color-status-held);
+  }
+  .code-closed {
+    color: var(--color-status-closed);
+  }
+
+  /* ── chart rows ────────────────────────────────────────────────────────── */
+
+  .chart-row {
+    display: grid;
+    align-items: baseline;
+    border-top: 1px solid var(--color-rule);
+    transition:
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .chart-row:hover {
+    background: var(--color-sheet-alt);
+  }
+
+  /* ── the claim primitive ───────────────────────────────────────────────────
+     Every claim anywhere in the product opens the fact detail panel. Underlined
+     with a hairline so it reads as traceable without becoming a link-blue mess.
+   */
+
+  .claim {
+    text-align: left;
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule-strong);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.1875rem;
+    transition: text-decoration-color 160ms ease;
+    cursor: pointer;
+  }
+
+  .claim:hover {
+    text-decoration-color: var(--color-signal);
+  }
+
+  /* ── controls ──────────────────────────────────────────────────────────── */
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border: 1px solid var(--color-rule-strong);
+    border-radius: 2px;
+    background: var(--color-sheet);
+    color: var(--color-ink);
+    font-family: var(--font-board);
+    font-size: var(--text-meta);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.3125rem 0.625rem;
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease;
+    cursor: pointer;
+  }
+
+  .btn:hover:not(:disabled) {
+    border-color: var(--color-ink-muted);
+    background: var(--color-sheet-alt);
+  }
+
+  .btn:active:not(:disabled) {
+    background: var(--color-rule);
+  }
+
+  .btn:disabled {
+    color: var(--color-ink-faint);
+    border-color: var(--color-rule);
+    background: var(--color-sheet-alt);
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: var(--color-signal);
+    border-color: var(--color-signal);
+    color: #fff;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-signal-hover);
+    border-color: var(--color-signal-hover);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    background: var(--color-signal-hover);
+  }
+
+  .btn-primary:disabled {
+    background: var(--color-rule);
+    border-color: var(--color-rule-strong);
+    color: var(--color-ink-faint);
+  }
+
+  .field {
+    width: 100%;
+    border: 1px solid var(--color-rule-strong);
+    border-radius: 2px;
+    background: var(--color-sheet);
+    color: var(--color-ink);
+    padding: 0.5rem 0.625rem;
+    font-family: var(--font-board);
+    font-size: var(--text-lead);
+    letter-spacing: 0.24em;
+    transition: border-color 160ms ease;
+  }
+
+  .field::placeholder {
+    color: var(--color-ink-faint);
+    letter-spacing: 0.12em;
+  }
+
+  .field:hover {
+    border-color: var(--color-ink-muted);
+  }
+
+  .field[aria-invalid="true"] {
+    border-color: var(--color-status-held);
+  }
+
+  /* ── overlays ──────────────────────────────────────────────────────────────
+     `dialog` rather than an absolutely positioned div: the fact panel opens from
+     inside a scrolling chart, and an overlay inside an `overflow` ancestor gets
+     clipped.
+   */
+
+  dialog::backdrop {
+    background: color-mix(in srgb, var(--color-board) 44%, transparent);
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-sheet-alt) 0%,
+      var(--color-rule) 50%,
+      var(--color-sheet-alt) 100%
+    );
+    background-size: 200% 100%;
+    animation: sweep 1.4s ease-in-out infinite;
+    border-radius: 1px;
+  }
+
+  @keyframes sweep {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+}
