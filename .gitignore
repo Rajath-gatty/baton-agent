@@ -27,3 +27,6 @@ golden.sql
 # Editor and OS
 .DS_Store
 Thumbs.db
+
+# Codegrpah
+.codegraph
