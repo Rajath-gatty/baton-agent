@@ -17,11 +17,28 @@ a test that runs, a screen that rendered. "The code exists" is `[~]`, not `[x]`.
 by an automated check rather than by inspection, the item says so, because an inspection result decays the
 moment someone edits the file and a test does not.
 
-**Status — 2026-09-13.** 114 done · 4 partial · 209 pending, of 327.
+**Status — 2026-09-13.** 147 done · 4 partial · 178 pending, of 329.
 
-`packages/core`, the database schema, and seed data generation are complete. `pnpm typecheck` passes on all
-five workspaces, `pnpm lint` is clean, `pnpm format` conforms, and 103 tests pass (70 in core, 11 in
+`packages/core`, the database schema, seed data generation, and **the agent container with all six
+agents** are complete. `pnpm typecheck` passes on all five workspaces, `pnpm build` on all four,
+`pnpm lint` is clean, `pnpm format` conforms, and 184 tests pass (106 in core, 45 in the agent, 11 in
 worker, 22 in scripts).
+
+The agent container dispatches all five tasks against real agents. `ingest` and `assess` are SDK
+`Graph`s; `brief` and `respond` are single agents; all three producing tasks run their output through the
+Restraint gate, and `ingest` cannot, because the type does not admit it. Every model response is
+validated against its Zod schema with the validation error fed back on retry, and the trace — nodes,
+model, tokens, tool calls, reasoning — is assembled and returned in the response payload.
+
+Four guarantees in this layer are automated rather than inspected. Restraint's scope is asserted against
+the wiring set, so it cannot silently narrow to findings; a withholding is asserted to produce a quiet
+decision from each of the three scopes; the observation constraint is asserted present in all six
+prompts, so a seventh cannot omit it; and the no-database-client rule was re-verified by probe after the
+Strands SDK was added, since a new dependency is exactly when that rule would break unnoticed.
+
+Two design deviations are recorded in the Agents section below, both forced by the SDK rather than
+chosen: Restraint is a produce-path gate rather than an `addHook`, and `Graph` uses a custom `Node`
+subclass rather than `AgentNode`.
 
 The schema is 20 tables with the first migration generated at
 `packages/core/drizzle/0000_tranquil_wolfpack.sql`, and three guarantees the checklist previously left to
@@ -38,13 +55,15 @@ Seed generation runs in the two phases the design requires. `pnpm seed:plan` wri
 renders 4,421 messages across six months and its coverage report exits non-zero on any unmatched row; the
 two-month development slice keeps every row while compressing rather than dropping.
 
-Four things are explicitly **not** done and should not be inferred from the above. Every Phase 0 gate is
-unproven, which is the next work. **No migration has been applied to a live database** — hardware
-virtualization is disabled on the development machine, so the Docker daemon will not start, `pnpm pg:up`
-cannot run, and the schema is proved by generated SQL rather than by Postgres accepting it. For the same
-reason no container image has been built. And **no seeded message has entered Postgres**: the transcript is
-an artifact on disk, because seeded messages must enter through the same normaliser as live traffic and
-that normaliser does not exist yet.
+Five things are explicitly **not** done and should not be inferred from the above. Every Phase 0 gate is
+unproven, which is the next work — and **no model call has been made**, so the six agents are wired,
+typechecked and unit-tested but have never seen a model. **No migration has been applied to a live
+database** — hardware virtualization is disabled on the development machine, so the Docker daemon will not
+start, `pnpm pg:up` cannot run, and the schema is proved by generated SQL rather than by Postgres accepting
+it. For the same reason no container image has been built. **No seeded message has entered Postgres**: the
+transcript is an artifact on disk, because seeded messages must enter through the same normaliser as live
+traffic and that normaliser does not exist yet. And the worker's four `/data/*` routes are still 501 stubs,
+so the agent's tool pull-path is wired and typed but not yet answerable.
 
 ---
 
@@ -112,8 +131,10 @@ Built before the three apps, because it is the contract between them.
 - [x] Zod schema: Respondent output — separate branches for answer, stale answer, ambiguous, unknown
 - [x] Zod schema: agent request envelope (`task`, payload, hydrated context)
 - [x] Zod schema: agent response envelope including the `trace` array
-- [x] Prompt files, each carrying a `prompt_version` constant — versions and the observation constraint
-      in place; the prompt bodies themselves land with each agent
+- [x] Prompt files, each carrying a `prompt_version` constant — versions, the observation constraint,
+      the shared JSON output contract, and all six prompt bodies. `OBSERVATION_CONSTRAINT` lives in
+      `prompts/constraints.ts` rather than the barrel, because the six bodies import it and the barrel
+      re-exports them, which in the barrel would be a cycle
 - [x] Shared types exported for the web app to consume — verified by probe: `apps/web` resolves core's
       types across the `Bundler`/`NodeNext` resolution boundary
 - [x] `@baton/core` exports resolve to `dist`, not `src`, so the production containers can load them —
@@ -258,47 +279,128 @@ them causes specific, known failures.
 ## Agent — container
 
 - [x] Express server implementing the AgentCore `/invocations` contract — plus `/ping`
-- [x] Dispatch on `task`: `ingest`, `assess`, `brief`, `respond`, `resume` — five branches wired, handlers
-      return a well-formed error envelope until each agent lands
+- [x] Dispatch on `task`: `ingest`, `assess`, `brief`, `respond`, `resume` — five branches wired, all
+      five now backed by real agents
 - [x] Per-agent model configuration from environment variables
-- [ ] Zod validation of every model response, with retry feeding the validation error back
-- [ ] Trace assembled and returned in the response payload — nodes, model, tokens, tool calls, reasoning
-- [ ] Strands tools wired to the worker's data API
+- [x] Zod validation of every model response, with retry feeding the validation error back —
+      `model/structured.ts`, three attempts, the validation error and the rejected output both fed
+      back on the same agent so conversation history carries. **Not** the SDK's
+      `structuredOutputSchema`, which throws `StructuredOutputError` without feeding the error back
+- [x] Trace assembled and returned in the response payload — nodes, model, tokens, tool calls,
+      reasoning. Model id comes from configuration, because the SDK exposes it on neither the result
+      nor the metrics. The partial trace is returned on failure too, or a failed run is undiagnosable
+- [x] Strands tools wired to the worker's data API — `searchFacts`, `getEvidence`, `getHoldings`,
+      `getPerson`, declared with plain JSON Schema rather than Zod so no Zod schema crosses the SDK
+      boundary. **The four `/data/*` routes are still 501 stubs**, so the pull path is wired and
+      typed but not yet answerable
 - [x] Dockerfile, Node 22+
-- [x] No database client anywhere in this workspace — verify by dependency inspection. Declared deps are
-      `@baton/core`, `express`, `zod` only, and ESLint fails on any DB import (verified by probe)
+- [x] No database client anywhere in this workspace — verify by dependency inspection. Declared deps
+      are `@baton/core`, `express`, `zod`, `@strands-agents/sdk` and `openai` (the last two are the
+      agent framework and its OpenAI-compatible provider), and ESLint fails on any DB import
+      (re-verified by probe after the SDK was added)
+- [x] **Zod 4 in `apps/agent`, Zod 3 in `packages/core`.** The SDK peer-depends on `zod@^4.1.12` and
+      calls `z.toJSONSchema` while its barrel initialises, so importing it at all requires v4 — a
+      runtime failure, not a typing one. Core keeps v3, shared with Drizzle and the web app. The two
+      never meet: this workspace imports no Zod (see `SchemaValidator` in `model/structured.ts`) and
+      only ever calls `safeParse` on core's schema objects, which is instance-local
 
 ## Agent — the six agents
 
-- [ ] **Curator** — five-way classification, multiple records per message, noise as a first-class
+- [x] **Curator** — five-way classification, multiple records per message, noise as a first-class
       outcome `[F7]`
-- [ ] Curator rejects conditionals, hypotheticals and jokes `[F11]`
-- [ ] Curator prompt forbids cross-message inference, so per-message caching stays sound
-- [ ] **Cartographer** — deterministic alias matching first `[F12]`
-- [ ] Cartographer model call only on ambiguity, with `cannot_determine` permitted
-- [ ] **Assessor** — severity over consequence, reversibility, urgency; confidence separate `[F16]`
-- [ ] Assessor aggregates by capability area `[F17]`
-- [ ] Assessor suppresses below an evidence threshold `[F17]`
-- [ ] Assessor phrases every finding about a capability, never a person
-- [ ] **Restraint** attached via `addHook`, not as a graph node `[F18]`
-- [ ] Restraint hook registered on **all three producing tasks** — `assess`, `brief`, `respond` `[F18]`
-- [ ] Gating per output class: findings only when `dedupe_key` is new or severity changed; **every** brief
-      line and **every** answer, unconditionally `[F18]`
-- [ ] Restraint withholding writes a `quiet_decisions` row with reasoning — from any of the three paths `[F18]`
-- [ ] Restraint reasoning is item-level or organisation-level, never about a person
-- [ ] **Briefer** — three fixed sections `[F23]`
-- [ ] Briefer emits line-level records with evidence refs, not prose blocks `[F25]`
-- [ ] Briefer handles the empty case with a plain sentence
-- [ ] Briefer arrival variant, same sections, scoped to unowned and single-held items `[F23]`
-- [ ] **Respondent** — answer with provenance and age `[F20]`
-- [ ] Respondent stale-answer branch, with the age stated
-- [ ] Respondent unknown branch, becoming a question `[F21]`
-- [ ] Respondent ambiguous-holder branch, routed privately `[F21]`
-- [ ] `ingest` graph: Curator → Cartographer — the one task with no Restraint hook, as it produces no text
-- [ ] `assess` graph: Assessor with Restraint hooked
-- [ ] `brief` task: Briefer with Restraint hooked on produce
-- [ ] `respond` task: Respondent with Restraint hooked on produce
-- [ ] Observation constraint honoured in every prompt: *seen doing*, never *can do*
+- [x] Curator rejects conditionals, hypotheticals and jokes `[F11]`
+- [x] Curator prompt forbids cross-message inference, so per-message caching stays sound — asserted by
+      test, along with the Curator having **no tools**, which is the other half of the same guarantee
+- [x] **Cartographer** — deterministic alias matching first `[F12]`. Exact, then single-character typo,
+      then bare-first-name, tried in order and never blended. Combining marks are preserved, or
+      Devanagari names normalise to a different string and match nothing
+- [x] Cartographer model call only on ambiguity, with `cannot_determine` permitted. A mention matching
+      one person resolves in code; several or none escalate, and the resolver never breaks a tie
+- [x] **Assessor** — severity over consequence, reversibility, urgency; confidence separate `[F16]`
+- [x] Assessor aggregates by capability area `[F17]`
+- [x] Assessor suppresses below an evidence threshold `[F17]` — with a reason, enforced by the schema,
+      and a suppressed candidate becomes a quiet decision without being sent to Restraint
+- [x] Assessor phrases every finding about a capability, never a person — checked in code against the
+      holder names the worker supplied, word-boundary matched, and recorded in the trace rather than
+      silently rewritten
+- [x] Assessor may not invent a `dedupe_key` — an unknown key is dropped, since the key is the upsert
+      target and dismissals are recorded against it
+- [x] **Restraint** attached on the produce path, not as a graph node `[F18]` — see the deviation note
+      below
+- [x] Restraint hook registered on **all three producing tasks** — `assess`, `brief` and `respond`
+      `[F18]`. Asserted by test against `RESTRAINT_ATTACHED_TASKS`, and `ingest` cannot be registered
+      as producing because the type does not admit it
+- [x] Gating per output class: findings only when `dedupe_key` is new or severity changed; **every**
+      brief line and **every** answer, unconditionally `[F18]`
+- [x] Restraint withholding writes a `quiet_decisions` row with reasoning — from any of the three
+      paths `[F18]`. Asserted per path. An item Restraint returned no decision for is withheld, not
+      surfaced
+- [x] Restraint reasoning is item-level or organisation-level, never about a person
+- [x] **Briefer** — three fixed sections `[F23]`
+- [x] Briefer emits line-level records with evidence refs, not prose blocks `[F25]`
+- [x] Briefer handles the empty case with a plain sentence — and reaches it without a model call when
+      there is no material, or when gating withholds every line
+- [x] Briefer arrival variant, same sections, scoped to unowned and single-held items `[F23]`
+- [x] **Respondent** — answer with provenance and age `[F20]`
+- [x] Respondent stale-answer branch, with the age stated — age and staleness are **recomputed** from
+      the register's own dates, so a model calling a five-month-old claim fresh is overruled
+- [x] Respondent unknown branch, becoming a question `[F21]` — also the fallback when nothing it cited
+      resolves, since provenance that does not resolve is worse than none
+- [x] Respondent ambiguous-holder branch, routed privately `[F21]`
+- [x] `ingest` graph: Curator → Cartographer — the one task with no Restraint hook, as it produces no
+      text
+- [x] `assess` graph: Assessor, gated by Restraint
+- [x] `brief` task: Briefer, gated by Restraint on produce
+- [x] `respond` task: Respondent, gated by Restraint on produce
+- [x] Observation constraint honoured in every prompt: *seen doing*, never *can do* — asserted by test
+      across all six, so a seventh prompt cannot quietly omit it
+
+**Two deviations from the technical design, both forced by the real SDK.**
+
+1. **Restraint is a produce-path gate, not an `addHook`.** The design describes it as a hook on the
+   produce path. `@strands-agents/sdk` has no after-node hook that can modify or suppress what a node
+   produced — `AfterNodeCallEvent` and `NodeResultEvent` expose the result read-only, and the only
+   documented veto is `BeforeNodeCallEvent.cancel`, which fires *before* a node runs and so cannot
+   judge its output. An `addHook` implementation would have been an observer that could not withhold
+   anything. Every property the design was buying is kept: the gate is the only thing that assembles a
+   producing task's result, a producing handler's signature requires one, and `producing()` in
+   `tasks/index.ts` is the only thing that supplies one — so the veto is still structural rather than a
+   convention between prompts, and its scope is still a plain value a test can read.
+
+2. **`Graph` uses a custom `Node` subclass, not `AgentNode`.** `AgentNode` invokes the agent itself and
+   passes the previous node's *text* onward, which would cost the validate-and-retry loop and the
+   Cartographer's deterministic alias pass, and would make the Cartographer re-parse the Curator's JSON
+   out of a chat message. `Node` is abstract with one abstract method, so `PipelineNode` extends it.
+   Ordering, per-node status and duration, failure capture and the hook surface remain the SDK's.
+   Typed results pass between nodes by closure, because `MultiAgentResult` exposes no app state.
+
+### Feature coverage from this section
+
+Every item above is `[x]`, but a ticked item is not a delivered feature: most of these features have a
+worker or web half that is still pending, and reading the ticks as feature completion is exactly the
+mistake this table exists to prevent. What the agent layer actually closes:
+
+| F | Agent side | Still needed elsewhere |
+| --- | --- | --- |
+| F7 Curator, multiple records per message | **Complete** | — |
+| F12 Alias matching, model only on ambiguity | **Complete** — schema and agent both done | — |
+| F11 Noise as a first-class outcome | Prompt and schema done | The golden message set is a manual run and needs **G1/G2** |
+| F16 Severity from the Assessor, confidence separate | Both produced, on separate axes | Worker writes the two columns |
+| F17 Aggregation and suppression over SQL candidates | Judgment implemented | **The five detection queries do not exist yet**, so there are no candidates to judge |
+| F18 Restraint on three paths, gated per output class | Gate, scoping and quiet-decision records done and asserted | Worker persists `quiet_decisions`; web renders the strip |
+| F20 Answer with provenance and age | Four branches, age recomputed from the register | Worker detects the question — mention or reply — and sends the reply |
+| F21 Questions targeted by sensitivity | Respondent proposes the target | Worker writes `questions` rows, enforces the ask budget, and routes |
+| F23 Brief, three fixed sections, join and leave | Both variants, including the empty case | Worker fires it from a `chat_member` event |
+| F25 Line-level brief records with evidence | Lines emitted with their own evidence refs | Worker writes `brief_lines`; web makes them assignable |
+
+So **F7 and F12 are closed outright**; the other eight are half-built, with the named half outstanding.
+`[F13]` and `[F15]` are referenced by the schema and worker sections rather than this one — the
+Cartographer writes holdings as history through the worker, and the five queries that render as four
+subtypes are the worker's — so neither advanced here.
+
+Two features this section does **not** touch, despite being agent-adjacent: `[F32]` interrupt raising and
+`[F33]` pending changes staying out of findings both belong to the Approval round trip below. The `resume`
+mechanism is implemented, but nothing raises an interrupt yet, so it is unreachable.
 
 ## Approval round trip
 
@@ -457,8 +559,9 @@ destroys the material fails rather than passing quietly.
       cases in `packages/core/test/agent-schemas.test.ts` cover all six schemas and every malformed
       branch the design names — suppression with no reason, a withholding with no reason, an empty brief
       that does not say so, a stale answer with no age, an ambiguous holder with one candidate. The
-      fixtures are hand-written; **real recorded model responses wait on G2**, and the retry path they
-      are meant to prove does not exist yet
+      retry path they are meant to prove now exists (`apps/agent/src/model/structured.ts`) and its
+      JSON-extraction seam is tested directly, but the loop itself is still exercised against
+      hand-written fixtures: **real recorded model responses wait on G2**
 - [ ] Detection SQL — five queries against fixtures with known answers
 - [ ] Detection SQL — `unverified` and `pending_approval` rows never appear
 - [ ] Fact matching — restatement bumps without inserting; contradiction inserts and links
@@ -472,7 +575,11 @@ destroys the material fails rather than passing quietly.
 - [ ] Ask budget — a fourth ask inside 24 hours queues `[F36]`
 - [ ] Ask budget — an approval raised while the budget is full of verifications is asked before them `[F36]`
 - [ ] Ask budget — a queued ask is neither dropped nor duplicated `[F36]`
-- [ ] Restraint scope — hook registered on `assess`, `brief` **and** `respond`, asserted directly `[F18]`
+- [x] Restraint scope — hook registered on `assess`, `brief` **and** `respond`, asserted directly `[F18]`
+      — `apps/agent/test/restraint-scope.test.ts` asserts the wiring set is exactly those three and that
+      `ingest` is absent; `apps/agent/test/gate.test.ts` asserts a withholding produces a quiet decision
+      from each of the three scopes, that an unjudged item is withheld rather than surfaced, and that a
+      settled finding is never re-sent to the model
 - [ ] Restraint scope — a withheld brief line and a withheld answer each write a `quiet_decisions` row `[F18]`
 - [x] Seed coverage — every coverage row matched or asserted by plan; a mutilated plan exits non-zero
       `[F2]`. 22 tests in `scripts/test/seed-coverage.test.ts`, and the mutilation cases are the point:
