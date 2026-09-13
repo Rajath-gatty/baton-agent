@@ -15,6 +15,7 @@
  */
 
 export * from "./envelope.js";
+export * from "./tasks.js";
 export * from "./curator.js";
 export * from "./cartographer.js";
 export * from "./assessor.js";

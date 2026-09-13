@@ -20,6 +20,13 @@ out/
 .next/
 *.tsbuildinfo
 
+# Next.js generated files. `next-env.d.ts` is written by `next build`, and the
+# standalone output resolves `outputFileTracingRoot` into a mirrored directory tree
+# under apps/. Neither is source, and leaving them untracked made `pnpm lint` fail on
+# generated code after any `pnpm build`.
+apps/web/next-env.d.ts
+apps/Hackathon/
+
 # Database dumps — never the Drizzle migrations, which must be committed
 *.dump
 *.pgdump

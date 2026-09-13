@@ -1,5 +1,5 @@
 /**
- * Prompt versions.
+ * Prompt versions and the six prompt bodies.
  *
  * `CURATOR_PROMPT_VERSION` is half of the curator cache key — the other half is
  * the message's `content_hash`. Bumping it invalidates every cached
@@ -11,6 +11,16 @@
  * or brief that reads oddly can be traced to the prompt revision that produced
  * it.
  */
+
+export { OBSERVATION_CONSTRAINT } from "./constraints.js";
+export { JSON_OUTPUT_CONTRACT, composePrompt } from "./shared.js";
+
+export { CURATOR_SYSTEM_PROMPT } from "./curator.js";
+export { CARTOGRAPHER_SYSTEM_PROMPT } from "./cartographer.js";
+export { ASSESSOR_SYSTEM_PROMPT } from "./assessor.js";
+export { RESTRAINT_SYSTEM_PROMPT } from "./restraint.js";
+export { BRIEFER_SYSTEM_PROMPT } from "./briefer.js";
+export { RESPONDENT_SYSTEM_PROMPT } from "./respondent.js";
 
 export const CURATOR_PROMPT_VERSION = 1;
 export const CARTOGRAPHER_PROMPT_VERSION = 1;
@@ -35,15 +45,3 @@ export const PROMPT_VERSIONS = {
   briefer: BRIEFER_PROMPT_VERSION,
   respondent: RESPONDENT_PROMPT_VERSION,
 } as const;
-
-/**
- * The observation constraint, appended to every prompt that describes what a
- * person does. Baton may state that no other volunteer has been *seen* doing
- * something; it may never state that no one else *can*.
- */
-export const OBSERVATION_CONSTRAINT = [
-  "You may only describe what has been observed in the messages you were given.",
-  "Never state or imply that a person is unable to do something, only that nobody",
-  "else has been seen doing it. Never compare volunteers. Never characterise a",
-  "person's reliability, effort, or availability.",
-].join(" ");
