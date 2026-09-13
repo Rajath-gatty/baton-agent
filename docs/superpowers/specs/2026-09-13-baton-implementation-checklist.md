@@ -17,17 +17,34 @@ a test that runs, a screen that rendered. "The code exists" is `[~]`, not `[x]`.
 by an automated check rather than by inspection, the item says so, because an inspection result decays the
 moment someone edits the file and a test does not.
 
-**Status — 2026-09-13.** 34 done · 1 partial · 292 pending, of 327.
+**Status — 2026-09-13.** 114 done · 4 partial · 209 pending, of 327.
 
-Repository and tooling complete and verified: `pnpm typecheck` passes on all five workspaces, `pnpm lint`
-is clean, `pnpm format` conforms, and 34 tests pass (23 in core, 11 in worker). Two guarantees that the
-checklist previously left to inspection are now automated — the no-database-client rule in `apps/agent` by
-ESLint, and the no-attendance-table / no-scoring-column rule by Drizzle introspection.
+`packages/core`, the database schema, and seed data generation are complete. `pnpm typecheck` passes on all
+five workspaces, `pnpm lint` is clean, `pnpm format` conforms, and 103 tests pass (70 in core, 11 in
+worker, 22 in scripts).
 
-Two things are explicitly **not** done and should not be inferred from the above. Every Phase 0 gate is
-unproven, which is the next work. And no container image has been built — the Docker daemon was
-unavailable at initialization, so the compose files are validated by `docker compose config` only and all
-three Dockerfiles remain untested.
+The schema is 20 tables with the first migration generated at
+`packages/core/drizzle/0000_tranquil_wolfpack.sql`, and three guarantees the checklist previously left to
+inspection are now automated: the no-database-client rule in `apps/agent` by ESLint, the
+no-attendance-table / no-scoring-column rule by Drizzle introspection over all 20 tables, and the
+weight-bearing columns and indexes by `packages/core/test/schema-invariants.test.ts` — which asserts that
+`questions.asked_at` is nullable **with no default**, that `holdings.holder_person_id` and
+`commitments.owner_person_id` stay nullable, that `facts.match_key` and `findings.dedupe_key` exist, and
+that all five named indexes appear in the generated SQL.
+
+Seed generation runs in the two phases the design requires. `pnpm seed:plan` writes a committed fixture —
+20 people, 12 assets across all six kinds, 6 capabilities, 61 events, 43 authored placements covering all
+26 coverage rows and all 5 planted cases — and refuses to write an invalid plan. `pnpm seed:transcript`
+renders 4,421 messages across six months and its coverage report exits non-zero on any unmatched row; the
+two-month development slice keeps every row while compressing rather than dropping.
+
+Four things are explicitly **not** done and should not be inferred from the above. Every Phase 0 gate is
+unproven, which is the next work. **No migration has been applied to a live database** — hardware
+virtualization is disabled on the development machine, so the Docker daemon will not start, `pnpm pg:up`
+cannot run, and the schema is proved by generated SQL rather than by Postgres accepting it. For the same
+reason no container image has been built. And **no seeded message has entered Postgres**: the transcript is
+an artifact on disk, because seeded messages must enter through the same normaliser as live traffic and
+that normaliser does not exist yet.
 
 ---
 
@@ -84,14 +101,15 @@ that follows it.
 
 Built before the three apps, because it is the contract between them.
 
-- [~] Drizzle schema for every table (see next section) — pgEnums defined from the shared constants;
-      table definitions remain
-- [ ] Zod schema: Curator output — five-way classification plus extracted records, **flat**
-- [ ] Zod schema: Cartographer output — attributions, resolved identity, `cannot_determine` branch
-- [ ] Zod schema: Assessor output — subtype, severity, confidence, reasoning, suppression flag
-- [ ] Zod schema: Restraint output — surface or withhold, with reason
-- [ ] Zod schema: Briefer output — three sections as line-level records, each with evidence refs
-- [ ] Zod schema: Respondent output — separate branches for answer, stale answer, ambiguous, unknown
+- [x] Drizzle schema for every table (see next section) — 20 tables, verified by test:
+      `packages/core/test/schema-invariants.test.ts` asserts the table set, the columns that must stay
+      nullable, and the constraints as generated
+- [x] Zod schema: Curator output — five-way classification plus extracted records, **flat**
+- [x] Zod schema: Cartographer output — attributions, resolved identity, `cannot_determine` branch
+- [x] Zod schema: Assessor output — subtype, severity, confidence, reasoning, suppression flag
+- [x] Zod schema: Restraint output — surface or withhold, with reason
+- [x] Zod schema: Briefer output — three sections as line-level records, each with evidence refs
+- [x] Zod schema: Respondent output — separate branches for answer, stale answer, ambiguous, unknown
 - [x] Zod schema: agent request envelope (`task`, payload, hydrated context)
 - [x] Zod schema: agent response envelope including the `trace` array
 - [x] Prompt files, each carrying a `prompt_version` constant — versions and the observation constraint
@@ -110,51 +128,58 @@ Built before the three apps, because it is the contract between them.
 Each table is one item; the columns that carry design weight are called out separately because omitting
 them causes specific, known failures.
 
-- [ ] `people` — telegram user id **nullable**, display name, status, joined/left timestamps
-- [ ] `person_aliases` — alias, kind; alias **not unique** (ambiguity must be representable) `[F12]`
-- [ ] `messages` — source, sender, sent-at, text, reply-to, flags, `content_hash`
-- [ ] `messages` unique constraint on `(chat_id, telegram_message_id)`
-- [ ] `messages.prefilter_verdict` **and** `prefilter_version` `[F6]`
-- [ ] `messages.curated_at`
-- [ ] `messages` flags: forwarded, edited, withdrawn, unprocessed `[F4]` `[F5]`
-- [ ] `curator_cache` keyed on `content_hash` + `prompt_version`
-- [ ] `assets` — six kinds, name, normalised key, `sensitivity`
-- [ ] `facts` — claim, confidence, source message, stated-by/at, `last_confirmed_at`, status, sensitivity
-- [ ] `facts.supersedes_fact_id` `[F8]`
-- [ ] `facts.match_key` — **without this the register fills with active near-duplicates** `[F8]`
-- [ ] `facts.curator_reasoning` — shown in the fact detail panel `[F27]`
-- [ ] `holdings` — asset, holder **nullable**, `holder_external`, `is_personal_resource`
-- [ ] `holdings.acquired_at` / `released_at`, append-only, never overwritten `[F13]`
-- [ ] `commitments` — substance, owner **nullable**, promised-at, deadline **nullable**, evidence, status
-- [ ] `commitments.asked_once_at` — ask-once-then-stop enforced in data, not in prompt
-- [ ] `capabilities`
-- [ ] `capability_coverage` `[F14]`
-- [ ] `findings` — type, subtype, title, why-it-matters, severity, confidence, evidence, status
-- [ ] `findings.dedupe_key` — **without this every sweep duplicates or resurrects** `[F19]`
-- [ ] `findings` first-seen / last-seen, dismissal reason, `assessor_reasoning`
-- [ ] `quiet_decisions` — what, why, which run `[F18]`
-- [ ] `questions` — kind, target, asked text, bot's telegram message id, answer, resolution
-- [ ] `questions.status` includes a `queued` state, and `asked_at` is **nullable** — a default of
-      insertion time makes the rolling window count questions never sent `[F36]`
-- [ ] `questions.interrupt_id` and `interrupt_name` `[F32]`
-- [ ] `pending_changes` — proposed write, consequence, status `[F31]` `[F33]`
-- [ ] `agent_sessions` — task, Strands session id, serialised snapshot
-- [ ] `runs` — messages read, candidates, extracted, **skipped**, findings, JSONB `trace` `[F28]`
-- [ ] `briefs` and `brief_lines` — lines as rows, assignable, each with evidence refs `[F25]`
-- [ ] `coordinator_state` — single row, `last_seen_at`
-- [ ] `app_settings` — chat id, org name, timezone, `coordinator_person_id`
-- [ ] Indexes: `messages(prefilter_verdict, curated_at)`, `facts(asset_id, status)`,
+- [x] `people` — telegram user id **nullable**, display name, status, joined/left timestamps
+- [x] `person_aliases` — alias, kind; alias **not unique** (ambiguity must be representable) `[F12]`
+- [x] `messages` — source, sender, sent-at, text, reply-to, flags, `content_hash`
+- [x] `messages` unique constraint on `(chat_id, telegram_message_id)`
+- [x] `messages.prefilter_verdict` **and** `prefilter_version` `[F6]`
+- [x] `messages.curated_at`
+- [x] `messages` flags: forwarded, edited, withdrawn, unprocessed `[F4]` `[F5]`
+- [x] `curator_cache` keyed on `content_hash` + `prompt_version` — the composite primary key *is* that
+      index, so a second one would be dead weight
+- [x] `assets` — six kinds, name, normalised key, `sensitivity`
+- [x] `facts` — claim, confidence, source message, stated-by/at, `last_confirmed_at`, status, sensitivity
+- [x] `facts.supersedes_fact_id` `[F8]`
+- [x] `facts.match_key` — **without this the register fills with active near-duplicates** `[F8]`
+- [x] `facts.curator_reasoning` — shown in the fact detail panel `[F27]`
+- [x] `holdings` — asset, holder **nullable**, `holder_external`, `is_personal_resource`
+- [x] `holdings.acquired_at` / `released_at`, append-only, never overwritten `[F13]`
+- [x] `commitments` — substance, owner **nullable**, promised-at, deadline **nullable**, evidence, status
+- [x] `commitments.asked_once_at` — ask-once-then-stop enforced in data, not in prompt
+- [x] `capabilities`
+- [x] `capability_coverage` `[F14]`
+- [x] `findings` — type, subtype, title, why-it-matters, severity, confidence, evidence, status
+- [x] `findings.dedupe_key` — **without this every sweep duplicates or resurrects** `[F19]`
+- [x] `findings` first-seen / last-seen, dismissal reason, `assessor_reasoning`
+- [x] `quiet_decisions` — what, why, which run `[F18]` — plus `scope`, so a test can prove the veto has
+      not narrowed to findings
+- [x] `questions` — kind, target, asked text, bot's telegram message id, answer, resolution
+- [x] `questions.status` includes a `queued` state, and `asked_at` is **nullable** — a default of
+      insertion time makes the rolling window count questions never sent `[F36]`. Asserted by test,
+      including the absence of a default
+- [x] `questions.interrupt_id` and `interrupt_name` `[F32]`
+- [x] `pending_changes` — proposed write, consequence, status `[F31]` `[F33]`
+- [x] `agent_sessions` — task, Strands session id, serialised snapshot
+- [x] `runs` — messages read, candidates, extracted, **skipped**, findings, JSONB `trace` `[F28]`
+- [x] `briefs` and `brief_lines` — lines as rows, assignable, each with evidence refs `[F25]`
+- [x] `coordinator_state` — single row, `last_seen_at` — single row enforced by a check constraint
+- [x] `app_settings` — chat id, org name, timezone, `coordinator_person_id` — same check constraint
+- [x] Indexes: `messages(prefilter_verdict, curated_at)`, `facts(asset_id, status)`,
       `holdings(asset_id, status)`, `findings(status, severity desc)`,
-      `curator_cache(content_hash, prompt_version)`
-- [ ] Migrations run from `packages/core` on worker start
+      `curator_cache(content_hash, prompt_version)` — all five asserted against the generated SQL
+- [~] Migrations run from `packages/core` on worker start — `runMigrations` is called first in
+      `apps/worker/src/main.ts` and `drizzle/0000_tranquil_wolfpack.sql` now exists, but **it has never
+      been applied to a live database**: the Docker daemon is still unavailable, so `pnpm pg:up` cannot
+      run. Unproven until the worker starts against real Postgres
 
 **Structural guarantees — verify by inspection, not by intent:**
 
 - [x] No attendance table exists anywhere — enforced by test, not inspection: Drizzle table
-      introspection in `packages/core/test/privacy-guarantees.test.ts`
-- [x] No per-person score column exists anywhere — no completion rate, reliability figure, or activity
-      metric. Same test, which is vacuous while the schema has no tables and load-bearing the moment one
-      is added.
+      introspection in `packages/core/test/privacy-guarantees.test.ts`. **No longer vacuous** — it now
+      introspects 20 real tables
+- [x] No per-person score column exists anywhere — no completion rate, no reliability figure, no activity
+      metric. Same test, over every column of all 20 tables. `capability_coverage` records that someone
+      was seen doing something and deliberately does not record how often or how well
 
 ## Worker — Telegram
 
@@ -332,68 +357,108 @@ them causes specific, known failures.
 
 ### Generation
 
-- [ ] `seed-plan.ts` produces the deterministic plan — roster of twenty with alias forms, six-month event
+- [x] `seed-plan.ts` produces the deterministic plan — roster of twenty with alias forms, six-month event
       calendar, asset inventory across all six kinds, capability areas, and a placement for every coverage
-      row below
-- [ ] Plan output committed as a fixture, so a regenerated transcript exercises the same paths
-- [ ] `seed-transcript.ts` renders prose against the plan, in day-sized chunks
-- [ ] **Six-month** transcript, twenty people, ~4,500 messages, reads as genuinely human
-- [ ] Enters through the same normaliser as live traffic, `source = 'seed'` `[F2]`
-- [ ] Currency INR, copy readable internationally
-- [ ] Two-month slice available for development, full six months for the final pass
-- [ ] **Coverage report emitted after render, keyed to the rows below, exiting non-zero on any unmatched
-      row** — a warning is not sufficient, because a transcript missing a path looks fine `[F2]`
-- [ ] Rows the scanner cannot pattern-match reported as *asserted by plan*, traceable to their placement
-- [ ] **Seed people bound to real Telegram user ids** for every account used on camera, asserted by the
-      script — the leaver must be the seeded owner of the donation page or the opening case does not fire
+      row below. Pure data: no model, no database, no network. Every assertion runs before anything is
+      written, so an invalid plan fails at generation
+- [x] Plan output committed as a fixture, so a regenerated transcript exercises the same paths —
+      `scripts/fixtures/seed-plan.json`, compared **byte for byte** against a fresh `buildPlan()` by test,
+      and `seed-transcript.ts` refuses to render from a stale fixture
+- [x] `seed-transcript.ts` renders prose against the plan, in day-sized chunks
+- [~] **Six-month** transcript, twenty people, ~4,500 messages, reads as genuinely human — 4,421 messages,
+      20 people, 2026-03-15 → 2026-09-12. What remains is only the last clause: filler is rendered from
+      deterministic templates, which reads as plausible operational chatter rather than as genuinely human.
+      A model-backed `FillerProvider` replaces it and the seam already exists; **blocked on G1 and G2**.
+      Placed material is authored and verbatim either way, so no coverage row depends on this
+- [ ] Enters through the same normaliser as live traffic, `source = 'seed'` `[F2]` — the renderer emits
+      normalised-shape records and tags `source: "seed"`, but nothing loads them yet. Deliberately not
+      done here: a second insert path in the seed script would be a second normaliser and the two would
+      drift. **Waiting on C's normaliser**; `backfill.ts` consumes the artifact through it
+- [x] Currency INR, copy readable internationally — ₹ amounts throughout, Bengaluru place names, English
+      that needs no local knowledge to follow
+- [x] Two-month slice available for development, full six months for the final pass —
+      `pnpm seed:transcript -- --months 2` gives 1,753 messages with **every coverage row still matched**;
+      placements compress into the shorter span rather than dropping, and their relative order is asserted
+      by test
+- [x] **Coverage report emitted after render, keyed to the rows below, exiting non-zero on any unmatched
+      row** — a warning is not sufficient, because a transcript missing a path looks fine `[F2]`. Observed
+      failing on a real gap (`relative_dates`, before its material was added) and passing afterwards
+- [x] Rows the scanner cannot pattern-match reported as *asserted by plan*, traceable to their placement —
+      two rows, each printing the plan message ids that claim it. A row with neither a scanner rule nor a
+      plan assertion is itself a non-zero exit
+- [~] **Seed people bound to real Telegram user ids** for every account used on camera, asserted by the
+      script — the leaver must be the seeded owner of the donation page or the opening case does not fire.
+      The binding *mechanism* is done and both halves are enforced: the plan asserts that the volunteer
+      bound to `leaver` is the sender of the donation-page message, and the transcript exits non-zero
+      unless `SEED_TELEGRAM_ID_{COORDINATOR,LEAVER,ARRIVER}` are set. **No real ids yet** — the demo
+      accounts do not exist, so runs currently pass `--allow-unbound`
 
 ### Planted cases — the demo spine
 
-- [ ] The orphan — donation page owner is the volunteer who leaves on camera
-- [ ] The restraint — four-day-old undated promise, nothing blocked on it
-- [ ] The stale answer — sterilisation rate, five months old
-- [ ] The provenance click — a brief line traceable to a five-month-old message
-- [ ] The approval — one ambiguous message about financial control changing hands
-- [ ] Cases woven through the transcript, not appended
+- [x] The orphan — donation page owner is the volunteer who leaves on camera. `pm006`, 8 April, from the
+      person bound to the `leaver` role. Asserted, not assumed
+- [x] The restraint — four-day-old undated promise, nothing blocked on it. `pm042`, 9 September
+- [x] The stale answer — sterilisation rate, five months old. `pm008`, 13 April, and never restated
+- [x] The provenance click — a brief line traceable to a five-month-old message. The same `pm006`, which is
+      why one message carries two cases rather than the fact being authored twice
+- [x] The approval — one ambiguous message about financial control changing hands. `pm040` and `pm041`,
+      3–4 September. Deliberately readable as an offer rather than a change
+- [x] Cases woven through the transcript, not appended — asserted by test: case material spans more than
+      one month, and every placed message is rendered in date order among that day's ordinary chatter
 
 ### Coverage rows — every behaviour path has material
 
 One item per row of the coverage table in the design document. A path with no material cannot be
 demonstrated and has almost certainly never been tested.
 
-- [ ] Durable fact — a settlement arrangement, a number printed on something, a named account holder
-- [ ] Commitment — one dated promise and one undated intention
-- [ ] Participation evidence — post-event thanks naming several people, more than once `[F14]`
-- [ ] Lifecycle — one departure and one arrival inside the seeded window, before the live one `[F3]`
-- [ ] Noise — jokes, agreement fragments, logistics chatter, a conditional about something that does not
+**All 26 are satisfied and verified by the coverage report: 24 matched by pattern against the rendered
+output, 2 asserted by plan.** Each row below names the requirement the scanner checks, so a paraphrase that
+destroys the material fails rather than passing quietly.
+
+- [x] Durable fact — a settlement arrangement, a number printed on something, a named account holder
+- [x] Commitment — one dated promise and one undated intention. Both halves checked; half is a failure
+- [x] Participation evidence — post-event thanks naming several people, more than once `[F14]` — count ≥ 2
+- [x] Lifecycle — one departure and one arrival inside the seeded window, before the live one `[F3]`
+- [x] Noise — jokes, agreement fragments, logistics chatter, a conditional about something that does not
       exist `[F11]`
-- [ ] Pre-filter recall — a durable fact buried in an otherwise chatty message `[F6]`
-- [ ] Multiple records per message — one message carrying both a fact and a commitment `[F7]`
-- [ ] Restatement — the same fact stated again months later, in different words `[F8]`
-- [ ] Contradiction — a fact replaced by a later one, the clinic's terms change `[F8]`
-- [ ] Negation — an arrangement explicitly ended `[F8]`
-- [ ] Hearsay — someone relaying what a third party said `[F9]`
-- [ ] Relative dates — "next Tuesday", "end of the month", "last week" `[F10]`
-- [ ] Identity — every alias kind: handle, display name, nickname, first name, role reference `[F12]`
-- [ ] Ambiguity — one first name resolving to two different people `[F12]`
-- [ ] Six asset kinds — at least one each: login, physical item, financial control, relationship,
-      document, public presence `[F13]`
-- [ ] Transfer of holding — one asset changing hands, so holdings history carries a closed row `[F13]`
-- [ ] Personal resource — an asset that is actually someone's own property, the van `[F15]`
-- [ ] Commitment closure — a promise later evidenced as done
-- [ ] Capability coverage — one capability with several observed participants, one with exactly one `[F14]`
-- [ ] Aggregation — three separate exposures inside a single capability area `[F17]`
-- [ ] Suppression — a candidate finding resting on one throwaway mention `[F17]`
-- [ ] Answerable question — an operational figure the coordinator is visibly asked more than once `[F20]`
-- [ ] Unknown — a question the transcript deliberately never answers `[F21]`
-- [ ] Credential exposure — a credential-shaped string pasted into the group `[F30]`
-- [ ] Media — a voice note and an image `[F5]`
-- [ ] Provenance edge cases — one forwarded message and one later edited `[F4]`
+- [x] Pre-filter recall — a durable fact buried in an otherwise chatty message `[F6]`
+- [x] Multiple records per message — one message carrying both a fact and a commitment `[F7]`
+- [x] Restatement — the same fact stated again months later, in different words `[F8]`
+- [x] Contradiction — a fact replaced by a later one, the clinic's terms change `[F8]`
+- [x] Negation — an arrangement explicitly ended `[F8]`
+- [x] Hearsay — someone relaying what a third party said `[F9]`
+- [x] Relative dates — "next Tuesday", "end of the month", "last week" `[F10]` — all three checked
+- [x] Identity — every alias kind: handle, display name, nickname, first name, role reference `[F12]`
+- [x] Ambiguity — one first name resolving to two different people `[F12]` — a real collision in the
+      roster, not a phrase: two people answer to "Priya"
+- [x] Six asset kinds — at least one each: login, physical item, financial control, relationship,
+      document, public presence `[F13]` — one scanner pattern per kind, plus a structural assertion on the
+      inventory
+- [x] Transfer of holding — one asset changing hands, so holdings history carries a closed row `[F13]`
+- [x] Personal resource — an asset that is actually someone's own property, the van `[F15]`
+- [x] Commitment closure — a promise later evidenced as done
+- [x] Capability coverage — one capability with several observed participants, one with exactly one `[F14]`
+      — **asserted by plan**: a property of the participation pools, checked in `plan.ts` rather than by a
+      regex over prose
+- [x] Aggregation — three separate exposures inside a single capability area `[F17]` — **asserted by
+      plan**, traceable to four placements in foster placement
+- [x] Suppression — a candidate finding resting on one throwaway mention `[F17]`
+- [x] Answerable question — an operational figure the coordinator is visibly asked more than once `[F20]`
+      — count ≥ 3: stated once, asked twice
+- [x] Unknown — a question the transcript deliberately never answers `[F21]`
+- [x] Credential exposure — a credential-shaped string pasted into the group `[F30]`
+- [x] Media — a voice note and an image `[F5]` — checked on `mediaKind`, not on words
+- [x] Provenance edge cases — one forwarded message and one later edited `[F4]` — checked on the flags
 
 ## Tests
 
 - [ ] Pre-filter — table-driven over a labelled corpus, scored on **recall**
-- [ ] Schema conformance — every Zod schema against recorded responses, including malformed ones
+- [~] Schema conformance — every Zod schema against recorded responses, including malformed ones. 26
+      cases in `packages/core/test/agent-schemas.test.ts` cover all six schemas and every malformed
+      branch the design names — suppression with no reason, a withholding with no reason, an empty brief
+      that does not say so, a stale answer with no age, an ambiguous holder with one candidate. The
+      fixtures are hand-written; **real recorded model responses wait on G2**, and the retry path they
+      are meant to prove does not exist yet
 - [ ] Detection SQL — five queries against fixtures with known answers
 - [ ] Detection SQL — `unverified` and `pending_approval` rows never appear
 - [ ] Fact matching — restatement bumps without inserting; contradiction inserts and links
@@ -409,7 +474,11 @@ demonstrated and has almost certainly never been tested.
 - [ ] Ask budget — a queued ask is neither dropped nor duplicated `[F36]`
 - [ ] Restraint scope — hook registered on `assess`, `brief` **and** `respond`, asserted directly `[F18]`
 - [ ] Restraint scope — a withheld brief line and a withheld answer each write a `quiet_decisions` row `[F18]`
-- [ ] Seed coverage — every coverage row matched or asserted by plan; a mutilated plan exits non-zero `[F2]`
+- [x] Seed coverage — every coverage row matched or asserted by plan; a mutilated plan exits non-zero
+      `[F2]`. 22 tests in `scripts/test/seed-coverage.test.ts`, and the mutilation cases are the point:
+      removing a row's only material, **paraphrasing** it, satisfying only half of a two-part row, and
+      dropping a count-based row to one occurrence each report as missing. A fail-closed check never
+      observed failing is indistinguishable from one that always passes
 - [x] Redaction — a credential-shaped string never renders. 20 cases, including negative cases proving
       the emergency number, Indian mobile numbers, rupee amounts and ISO dates survive unchanged
 - [x] Structural privacy guarantees — Drizzle introspection asserting no attendance table and no scoring

@@ -1,0 +1,1958 @@
+{
+  "planVersion": 1,
+  "months": 6,
+  "windowStart": "2026-03-15",
+  "windowEnd": "2026-09-12",
+  "timezone": "Asia/Kolkata",
+  "currency": "INR",
+  "orgName": "Paws & Claws Collective",
+  "coordinatorPersonId": "p01",
+  "people": [
+    {
+      "id": "p01",
+      "displayName": "Priya Raghavan",
+      "aliases": [
+        {
+          "alias": "Priya Raghavan",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@priya_pc",
+          "kind": "handle"
+        },
+        {
+          "alias": "Priya",
+          "kind": "first_name"
+        },
+        {
+          "alias": "Pri",
+          "kind": "nickname"
+        },
+        {
+          "alias": "the coordinator",
+          "kind": "role_reference"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": true,
+      "demoRole": "coordinator"
+    },
+    {
+      "id": "p02",
+      "displayName": "Meera Sundaram",
+      "aliases": [
+        {
+          "alias": "Meera Sundaram",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@meera_s",
+          "kind": "handle"
+        },
+        {
+          "alias": "Meera",
+          "kind": "first_name"
+        },
+        {
+          "alias": "Meeru",
+          "kind": "nickname"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": "leaver"
+    },
+    {
+      "id": "p03",
+      "displayName": "Anil Kumar",
+      "aliases": [
+        {
+          "alias": "Anil Kumar",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@anilk",
+          "kind": "handle"
+        },
+        {
+          "alias": "Anil",
+          "kind": "first_name"
+        },
+        {
+          "alias": "Anil bhai",
+          "kind": "nickname"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p04",
+      "displayName": "Priya Menon",
+      "aliases": [
+        {
+          "alias": "Priya Menon",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@priyam_vet",
+          "kind": "handle"
+        },
+        {
+          "alias": "Priya",
+          "kind": "first_name"
+        },
+        {
+          "alias": "the vet",
+          "kind": "role_reference"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p05",
+      "displayName": "Suresh Iyer",
+      "aliases": [
+        {
+          "alias": "Suresh Iyer",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@suresh_iyer",
+          "kind": "handle"
+        },
+        {
+          "alias": "Suresh",
+          "kind": "first_name"
+        },
+        {
+          "alias": "Suri",
+          "kind": "nickname"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p06",
+      "displayName": "Kavya Reddy",
+      "aliases": [
+        {
+          "alias": "Kavya Reddy",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@kavya_r",
+          "kind": "handle"
+        },
+        {
+          "alias": "Kavya",
+          "kind": "first_name"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p07",
+      "displayName": "Farhan Sheikh",
+      "aliases": [
+        {
+          "alias": "Farhan Sheikh",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@farhan_sh",
+          "kind": "handle"
+        },
+        {
+          "alias": "Farhan",
+          "kind": "first_name"
+        },
+        {
+          "alias": "Fari",
+          "kind": "nickname"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p08",
+      "displayName": "Divya Nair",
+      "aliases": [
+        {
+          "alias": "Divya Nair",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@divya_n",
+          "kind": "handle"
+        },
+        {
+          "alias": "Divya",
+          "kind": "first_name"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": "2026-06-18",
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p09",
+      "displayName": "Rahul Bose",
+      "aliases": [
+        {
+          "alias": "Rahul Bose",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@rahulb",
+          "kind": "handle"
+        },
+        {
+          "alias": "Rahul",
+          "kind": "first_name"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p10",
+      "displayName": "Sneha Pillai",
+      "aliases": [
+        {
+          "alias": "Sneha Pillai",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@sneha_p",
+          "kind": "handle"
+        },
+        {
+          "alias": "Sneha",
+          "kind": "first_name"
+        },
+        {
+          "alias": "the foster lead",
+          "kind": "role_reference"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p11",
+      "displayName": "Vikram Shetty",
+      "aliases": [
+        {
+          "alias": "Vikram Shetty",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@vikram_shetty",
+          "kind": "handle"
+        },
+        {
+          "alias": "Vikram",
+          "kind": "first_name"
+        },
+        {
+          "alias": "Vik",
+          "kind": "nickname"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p12",
+      "displayName": "Aisha Khan",
+      "aliases": [
+        {
+          "alias": "Aisha Khan",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@aisha_k",
+          "kind": "handle"
+        },
+        {
+          "alias": "Aisha",
+          "kind": "first_name"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p13",
+      "displayName": "Gopal Krishnan",
+      "aliases": [
+        {
+          "alias": "Gopal Krishnan",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@gopalk",
+          "kind": "handle"
+        },
+        {
+          "alias": "Gopal",
+          "kind": "first_name"
+        },
+        {
+          "alias": "Gopu",
+          "kind": "nickname"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p14",
+      "displayName": "Nandini Rao",
+      "aliases": [
+        {
+          "alias": "Nandini Rao",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@nandini_rao",
+          "kind": "handle"
+        },
+        {
+          "alias": "Nandini",
+          "kind": "first_name"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p15",
+      "displayName": "Imran Qureshi",
+      "aliases": [
+        {
+          "alias": "Imran Qureshi",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@imranq",
+          "kind": "handle"
+        },
+        {
+          "alias": "Imran",
+          "kind": "first_name"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p16",
+      "displayName": "Lakshmi Venkat",
+      "aliases": [
+        {
+          "alias": "Lakshmi Venkat",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@lakshmi_v",
+          "kind": "handle"
+        },
+        {
+          "alias": "Lakshmi",
+          "kind": "first_name"
+        },
+        {
+          "alias": "Lucky",
+          "kind": "nickname"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p17",
+      "displayName": "Tarun Joshi",
+      "aliases": [
+        {
+          "alias": "Tarun Joshi",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@tarun_j",
+          "kind": "handle"
+        },
+        {
+          "alias": "Tarun",
+          "kind": "first_name"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p18",
+      "displayName": "Zoya Merchant",
+      "aliases": [
+        {
+          "alias": "Zoya Merchant",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@zoya_m",
+          "kind": "handle"
+        },
+        {
+          "alias": "Zoya",
+          "kind": "first_name"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p19",
+      "displayName": "Harish Gowda",
+      "aliases": [
+        {
+          "alias": "Harish Gowda",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@harish_g",
+          "kind": "handle"
+        },
+        {
+          "alias": "Harish",
+          "kind": "first_name"
+        },
+        {
+          "alias": "Hari",
+          "kind": "nickname"
+        }
+      ],
+      "joinedAt": null,
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": null
+    },
+    {
+      "id": "p20",
+      "displayName": "Ananya Bhat",
+      "aliases": [
+        {
+          "alias": "Ananya Bhat",
+          "kind": "display_name"
+        },
+        {
+          "alias": "@ananya_bhat",
+          "kind": "handle"
+        },
+        {
+          "alias": "Ananya",
+          "kind": "first_name"
+        }
+      ],
+      "joinedAt": "2026-07-06",
+      "leftAt": null,
+      "isCoordinator": false,
+      "demoRole": "arriver"
+    }
+  ],
+  "assets": [
+    {
+      "id": "a01",
+      "kind": "financial_control",
+      "name": "Razorpay donation page",
+      "normalisedKey": "razorpay donation page",
+      "sensitivity": "sensitive",
+      "isPersonalResource": false
+    },
+    {
+      "id": "a02",
+      "kind": "financial_control",
+      "name": "bank account signatory",
+      "normalisedKey": "bank account signatory",
+      "sensitivity": "sensitive",
+      "isPersonalResource": false
+    },
+    {
+      "id": "a03",
+      "kind": "account_login",
+      "name": "Instagram login",
+      "normalisedKey": "instagram login",
+      "sensitivity": "sensitive",
+      "isPersonalResource": false
+    },
+    {
+      "id": "a04",
+      "kind": "account_login",
+      "name": "PetRescue listings portal login",
+      "normalisedKey": "petrescue listings portal login",
+      "sensitivity": "sensitive",
+      "isPersonalResource": false
+    },
+    {
+      "id": "a05",
+      "kind": "physical_item",
+      "name": "the van",
+      "normalisedKey": "the van",
+      "sensitivity": "normal",
+      "isPersonalResource": true
+    },
+    {
+      "id": "a06",
+      "kind": "physical_item",
+      "name": "microchip scanner",
+      "normalisedKey": "microchip scanner",
+      "sensitivity": "normal",
+      "isPersonalResource": false
+    },
+    {
+      "id": "a07",
+      "kind": "relationship",
+      "name": "Sunrise Clinic account",
+      "normalisedKey": "sunrise clinic account",
+      "sensitivity": "normal",
+      "isPersonalResource": false
+    },
+    {
+      "id": "a08",
+      "kind": "relationship",
+      "name": "Green Paws pet store sponsorship",
+      "normalisedKey": "green paws pet store sponsorship",
+      "sensitivity": "normal",
+      "isPersonalResource": false
+    },
+    {
+      "id": "a09",
+      "kind": "document",
+      "name": "foster carer spreadsheet",
+      "normalisedKey": "foster carer spreadsheet",
+      "sensitivity": "sensitive",
+      "isPersonalResource": false
+    },
+    {
+      "id": "a10",
+      "kind": "document",
+      "name": "adoption agreement template",
+      "normalisedKey": "adoption agreement template",
+      "sensitivity": "normal",
+      "isPersonalResource": false
+    },
+    {
+      "id": "a11",
+      "kind": "public_presence",
+      "name": "emergency number on the posters",
+      "normalisedKey": "emergency number on the posters",
+      "sensitivity": "normal",
+      "isPersonalResource": false
+    },
+    {
+      "id": "a12",
+      "kind": "public_presence",
+      "name": "Instagram page",
+      "normalisedKey": "instagram page",
+      "sensitivity": "normal",
+      "isPersonalResource": false
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "c01",
+      "name": "foster placement",
+      "normalisedKey": "foster placement"
+    },
+    {
+      "id": "c02",
+      "name": "adoption day setup",
+      "normalisedKey": "adoption day setup"
+    },
+    {
+      "id": "c03",
+      "name": "microchipping",
+      "normalisedKey": "microchipping"
+    },
+    {
+      "id": "c04",
+      "name": "vet transport",
+      "normalisedKey": "vet transport"
+    },
+    {
+      "id": "c05",
+      "name": "intake triage",
+      "normalisedKey": "intake triage"
+    },
+    {
+      "id": "c06",
+      "name": "social media posting",
+      "normalisedKey": "social media posting"
+    }
+  ],
+  "events": [
+    {
+      "id": "e010",
+      "date": "2026-03-16",
+      "kind": "sterilisation_camp",
+      "name": "sterilisation camp",
+      "participantIds": [
+        "p04",
+        "p07",
+        "p09"
+      ]
+    },
+    {
+      "id": "e042",
+      "date": "2026-03-17",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p10",
+        "p14",
+        "p17"
+      ]
+    },
+    {
+      "id": "e001",
+      "date": "2026-03-18",
+      "kind": "adoption_day",
+      "name": "adoption day at the park",
+      "participantIds": [
+        "p02",
+        "p03",
+        "p10",
+        "p11"
+      ]
+    },
+    {
+      "id": "e059",
+      "date": "2026-03-18",
+      "kind": "fundraiser",
+      "name": "fundraiser stall",
+      "participantIds": [
+        "p11",
+        "p19"
+      ]
+    },
+    {
+      "id": "e017",
+      "date": "2026-03-23",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e018",
+      "date": "2026-03-30",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e043",
+      "date": "2026-03-30",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p02",
+        "p10"
+      ]
+    },
+    {
+      "id": "e019",
+      "date": "2026-04-06",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e002",
+      "date": "2026-04-08",
+      "kind": "adoption_day",
+      "name": "adoption day at the park",
+      "participantIds": [
+        "p03",
+        "p06",
+        "p12",
+        "p13"
+      ]
+    },
+    {
+      "id": "e044",
+      "date": "2026-04-08",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p02",
+        "p12",
+        "p14"
+      ]
+    },
+    {
+      "id": "e011",
+      "date": "2026-04-13",
+      "kind": "sterilisation_camp",
+      "name": "sterilisation camp",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p07",
+        "p09"
+      ]
+    },
+    {
+      "id": "e020",
+      "date": "2026-04-13",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e021",
+      "date": "2026-04-20",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e045",
+      "date": "2026-04-20",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p02",
+        "p10",
+        "p12",
+        "p14"
+      ]
+    },
+    {
+      "id": "e022",
+      "date": "2026-04-27",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e003",
+      "date": "2026-04-29",
+      "kind": "adoption_day",
+      "name": "adoption day at the park",
+      "participantIds": [
+        "p12",
+        "p13"
+      ]
+    },
+    {
+      "id": "e046",
+      "date": "2026-04-30",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p02",
+        "p10",
+        "p12",
+        "p17"
+      ]
+    },
+    {
+      "id": "e023",
+      "date": "2026-05-04",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e012",
+      "date": "2026-05-11",
+      "kind": "sterilisation_camp",
+      "name": "sterilisation camp",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p07",
+        "p09"
+      ]
+    },
+    {
+      "id": "e024",
+      "date": "2026-05-11",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05"
+      ]
+    },
+    {
+      "id": "e047",
+      "date": "2026-05-11",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p02",
+        "p10",
+        "p14",
+        "p17"
+      ]
+    },
+    {
+      "id": "e025",
+      "date": "2026-05-18",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e004",
+      "date": "2026-05-20",
+      "kind": "adoption_day",
+      "name": "adoption day at the park",
+      "participantIds": [
+        "p03",
+        "p11",
+        "p12",
+        "p13"
+      ]
+    },
+    {
+      "id": "e048",
+      "date": "2026-05-22",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p02",
+        "p14"
+      ]
+    },
+    {
+      "id": "e026",
+      "date": "2026-05-25",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e027",
+      "date": "2026-06-01",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p09"
+      ]
+    },
+    {
+      "id": "e049",
+      "date": "2026-06-02",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p02",
+        "p12",
+        "p14",
+        "p17"
+      ]
+    },
+    {
+      "id": "e013",
+      "date": "2026-06-08",
+      "kind": "sterilisation_camp",
+      "name": "sterilisation camp",
+      "participantIds": [
+        "p04",
+        "p07"
+      ]
+    },
+    {
+      "id": "e028",
+      "date": "2026-06-08",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e005",
+      "date": "2026-06-10",
+      "kind": "adoption_day",
+      "name": "adoption day at the park",
+      "participantIds": [
+        "p10",
+        "p11",
+        "p16"
+      ]
+    },
+    {
+      "id": "e060",
+      "date": "2026-06-10",
+      "kind": "fundraiser",
+      "name": "fundraiser stall",
+      "participantIds": [
+        "p03",
+        "p06",
+        "p07",
+        "p16"
+      ]
+    },
+    {
+      "id": "e029",
+      "date": "2026-06-15",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p09"
+      ]
+    },
+    {
+      "id": "e050",
+      "date": "2026-06-15",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p02",
+        "p14"
+      ]
+    },
+    {
+      "id": "e030",
+      "date": "2026-06-22",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e051",
+      "date": "2026-06-24",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p02",
+        "p12",
+        "p14",
+        "p17"
+      ]
+    },
+    {
+      "id": "e031",
+      "date": "2026-06-29",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e006",
+      "date": "2026-07-01",
+      "kind": "adoption_day",
+      "name": "adoption day at the park",
+      "participantIds": [
+        "p07",
+        "p10"
+      ]
+    },
+    {
+      "id": "e014",
+      "date": "2026-07-06",
+      "kind": "sterilisation_camp",
+      "name": "sterilisation camp",
+      "participantIds": [
+        "p04",
+        "p07",
+        "p09"
+      ]
+    },
+    {
+      "id": "e032",
+      "date": "2026-07-06",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e052",
+      "date": "2026-07-06",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p17"
+      ]
+    },
+    {
+      "id": "e033",
+      "date": "2026-07-13",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e053",
+      "date": "2026-07-16",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p02",
+        "p10",
+        "p12",
+        "p17"
+      ]
+    },
+    {
+      "id": "e034",
+      "date": "2026-07-20",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e007",
+      "date": "2026-07-22",
+      "kind": "adoption_day",
+      "name": "adoption day at the park",
+      "participantIds": [
+        "p02",
+        "p07",
+        "p10",
+        "p11",
+        "p16"
+      ]
+    },
+    {
+      "id": "e035",
+      "date": "2026-07-27",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e054",
+      "date": "2026-07-27",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p02",
+        "p14",
+        "p17"
+      ]
+    },
+    {
+      "id": "e015",
+      "date": "2026-08-03",
+      "kind": "sterilisation_camp",
+      "name": "sterilisation camp",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p07",
+        "p09"
+      ]
+    },
+    {
+      "id": "e036",
+      "date": "2026-08-03",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e055",
+      "date": "2026-08-07",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p10",
+        "p14"
+      ]
+    },
+    {
+      "id": "e037",
+      "date": "2026-08-10",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e008",
+      "date": "2026-08-12",
+      "kind": "adoption_day",
+      "name": "adoption day at the park",
+      "participantIds": [
+        "p02",
+        "p07",
+        "p11",
+        "p19"
+      ]
+    },
+    {
+      "id": "e038",
+      "date": "2026-08-17",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p09"
+      ]
+    },
+    {
+      "id": "e056",
+      "date": "2026-08-18",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p02",
+        "p10",
+        "p14"
+      ]
+    },
+    {
+      "id": "e039",
+      "date": "2026-08-24",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e016",
+      "date": "2026-08-31",
+      "kind": "sterilisation_camp",
+      "name": "sterilisation camp",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p07",
+        "p09"
+      ]
+    },
+    {
+      "id": "e040",
+      "date": "2026-08-31",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e057",
+      "date": "2026-08-31",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p01",
+        "p10",
+        "p12",
+        "p14",
+        "p17"
+      ]
+    },
+    {
+      "id": "e009",
+      "date": "2026-09-02",
+      "kind": "adoption_day",
+      "name": "adoption day at the park",
+      "participantIds": [
+        "p03",
+        "p06",
+        "p11",
+        "p19"
+      ]
+    },
+    {
+      "id": "e061",
+      "date": "2026-09-02",
+      "kind": "fundraiser",
+      "name": "fundraiser stall",
+      "participantIds": [
+        "p06",
+        "p07",
+        "p16"
+      ]
+    },
+    {
+      "id": "e041",
+      "date": "2026-09-07",
+      "kind": "vet_run",
+      "name": "vet run",
+      "participantIds": [
+        "p04",
+        "p05",
+        "p09"
+      ]
+    },
+    {
+      "id": "e058",
+      "date": "2026-09-09",
+      "kind": "intake",
+      "name": "intake from the shelter gate",
+      "participantIds": [
+        "p02",
+        "p12",
+        "p14",
+        "p17"
+      ]
+    }
+  ],
+  "placements": [
+    {
+      "date": "2026-03-18",
+      "minute": 645,
+      "senderId": "p01",
+      "text": "Confirmed with Sunrise Clinic — they'll let us settle at the end of each month instead of paying per visit. Dr Menon signed off on it.",
+      "coverage": [
+        "durable_fact",
+        "six_asset_kinds"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "The settlement arrangement. Restated in July, contradicted in August.",
+      "id": "pm001"
+    },
+    {
+      "date": "2026-03-20",
+      "minute": 1140,
+      "senderId": "p05",
+      "text": "Reminder for everyone: the van is my own car, not the rescue's. Happy to drive but please don't commit it without asking me first.",
+      "coverage": [
+        "personal_resource",
+        "six_asset_kinds"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Personal resource. Must render as not_ours rather than a one-person risk.",
+      "id": "pm002"
+    },
+    {
+      "date": "2026-03-24",
+      "minute": 1005,
+      "senderId": "p01",
+      "text": "The emergency number on the new posters is +91 98450 33221. Two hundred of them are already up around Indiranagar so we cannot change it now.",
+      "coverage": [
+        "durable_fact",
+        "six_asset_kinds"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "A number printed on something. Also the redaction negative case: this must survive.",
+      "id": "pm003"
+    },
+    {
+      "date": "2026-03-26",
+      "minute": 780,
+      "senderId": "p10",
+      "text": "I keep the foster carer list in my own spreadsheet, it's easier than the shared drive. Ping me if you need a placement and I'll check who's free.",
+      "coverage": [
+        "durable_fact",
+        "six_asset_kinds",
+        "aggregation"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Foster spreadsheet held by one person. First of three exposures in foster placement.",
+      "id": "pm004"
+    },
+    {
+      "date": "2026-03-29",
+      "minute": 1215,
+      "senderId": "p13",
+      "text": "If we ever get a second van we could cover the east side properly on camp days.",
+      "coverage": [
+        "noise"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "A conditional about something that does not exist. Contains an asset, a capability and a place, and means nothing.",
+      "id": "pm005"
+    },
+    {
+      "date": "2026-04-08",
+      "minute": 1125,
+      "senderId": "p02",
+      "text": "Set up the Razorpay donation page this evening, it's live now. It's registered under my name and my number, so anything about payouts comes to me.",
+      "coverage": [
+        "durable_fact",
+        "six_asset_kinds"
+      ],
+      "cases": [
+        "orphan",
+        "provenance_click"
+      ],
+      "flags": {},
+      "note": "THE ORPHAN and THE PROVENANCE CLICK. Meera is the account that leaves on camera; five months before recording.",
+      "id": "pm006"
+    },
+    {
+      "date": "2026-04-09",
+      "minute": 600,
+      "senderId": "p01",
+      "text": "Brilliant, thank you Meeru. Everyone please share that link and not the old bank details.",
+      "coverage": [
+        "identity_all_alias_kinds",
+        "noise"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Nickname reference. Also an agreement fragment, which is noise.",
+      "id": "pm007"
+    },
+    {
+      "date": "2026-04-13",
+      "minute": 1260,
+      "senderId": "p04",
+      "text": "Final count from the March camp: our sterilisation rate is running at 62 animals a month across both clinics.",
+      "coverage": [
+        "durable_fact",
+        "answerable_question"
+      ],
+      "cases": [
+        "stale_answer"
+      ],
+      "flags": {},
+      "note": "THE STALE ANSWER. Five months old on recording day. Never restated.",
+      "id": "pm008"
+    },
+    {
+      "date": "2026-04-15",
+      "minute": 855,
+      "senderId": "p03",
+      "text": "Thanks Kavya, Farhan and Vikram for Sunday — we got fourteen adoptions done and the stall was spotless by six.",
+      "coverage": [
+        "participation_evidence",
+        "capability_coverage"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Post-event thanks naming several people. First of two.",
+      "id": "pm009"
+    },
+    {
+      "date": "2026-04-18",
+      "minute": 1020,
+      "senderId": "p06",
+      "text": "Can someone bring the adoption agreement template on Sunday? Also I'll call the printers on Tuesday about the reprint.",
+      "coverage": [
+        "multiple_records_per_message",
+        "commitment",
+        "relative_dates",
+        "six_asset_kinds"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "One message carrying both a fact reference and a dated commitment, with a relative date.",
+      "id": "pm010"
+    },
+    {
+      "date": "2026-04-23",
+      "minute": 735,
+      "senderId": "p06",
+      "text": "Printers sorted — reprint is done and collected, they're in the boot of the van.",
+      "coverage": [
+        "commitment_closure"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "The Tuesday promise, later evidenced as done.",
+      "id": "pm011"
+    },
+    {
+      "date": "2026-04-27",
+      "minute": 1305,
+      "senderId": "p07",
+      "text": "I'll take the microchipping again at the next camp, I've got the hang of the scanner now.",
+      "coverage": [
+        "capability_coverage"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Microchipping: Farhan is the only person ever named doing it. The capability variant of sole_holder.",
+      "id": "pm012"
+    },
+    {
+      "date": "2026-05-04",
+      "minute": 915,
+      "senderId": "p12",
+      "text": "@priya_pc the coordinator said we should route new intakes through triage first — Priya Raghavan can confirm.",
+      "coverage": [
+        "identity_all_alias_kinds"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Handle, role reference and display name for one person in a single message.",
+      "id": "pm013"
+    },
+    {
+      "date": "2026-05-06",
+      "minute": 1080,
+      "senderId": "p11",
+      "text": "What's our sterilisation rate these days? Someone asked at the stall and I had no idea what to say.",
+      "coverage": [
+        "answerable_question"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "The operational figure asked the first time.",
+      "id": "pm014"
+    },
+    {
+      "date": "2026-05-11",
+      "minute": 690,
+      "senderId": "p09",
+      "text": "Voice note about the Whitefield pickup",
+      "coverage": [
+        "media"
+      ],
+      "cases": [],
+      "flags": {
+        "media": "voice"
+      },
+      "note": "A voice note. Logged with unprocessed rather than dropped.",
+      "id": "pm015"
+    },
+    {
+      "date": "2026-05-13",
+      "minute": 1170,
+      "senderId": "p16",
+      "text": "Photo from today's intake",
+      "coverage": [
+        "media"
+      ],
+      "cases": [],
+      "flags": {
+        "media": "photo"
+      },
+      "note": "An image. The other half of the media row.",
+      "id": "pm016"
+    },
+    {
+      "date": "2026-05-19",
+      "minute": 825,
+      "senderId": "p14",
+      "text": "Kavya told me the vet said we shouldn't schedule sterilisations within ten days of a vaccination. Passing it on, I haven't checked myself.",
+      "coverage": [
+        "hearsay"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Someone relaying what a third party said. Must be written unverified and stay out of detection.",
+      "id": "pm017"
+    },
+    {
+      "date": "2026-05-21",
+      "minute": 1245,
+      "senderId": "p19",
+      "text": "Anyone know the Green Paws contact's number? I want to ask about the sponsorship renewal.",
+      "coverage": [
+        "unknown"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "A question the transcript deliberately never answers.",
+      "id": "pm018"
+    },
+    {
+      "date": "2026-05-23",
+      "minute": 960,
+      "senderId": "p18",
+      "text": "Forwarded: the BBMP notice about the new licensing rules for rescues, worth a read before the next camp.",
+      "coverage": [
+        "provenance_forwarded_and_edited"
+      ],
+      "cases": [],
+      "flags": {
+        "forwarded": true,
+        "forwardedFrom": "BBMP Animal Husbandry"
+      },
+      "note": "Forwarded message. Attributed to the forwarder and flagged.",
+      "id": "pm019"
+    },
+    {
+      "date": "2026-05-27",
+      "minute": 1035,
+      "senderId": "p13",
+      "text": "Priya has the microchip scanner I think, she took it after the last camp.",
+      "coverage": [
+        "ambiguity_one_name_two_people"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Two people answer to Priya. Ambiguity is the output, not a coin flip.",
+      "id": "pm020"
+    },
+    {
+      "date": "2026-05-29",
+      "minute": 1290,
+      "senderId": "p02",
+      "text": "Instagram login for the page — the password is Paws@Rescue2026! if anyone needs to post while I'm away.",
+      "coverage": [
+        "credential_exposure",
+        "six_asset_kinds"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "A credential-shaped string pasted into the group. Stored verbatim, redacted wherever quoted.",
+      "id": "pm021"
+    },
+    {
+      "date": "2026-06-03",
+      "minute": 750,
+      "senderId": "p17",
+      "text": "Long day. Three pickups, one of them a Lab mix from a construction site who was terrified, and my scooter has a flat. Anyway — Green Paws have agreed to sponsor the food for the next two camps, I got that in writing from Deepak.",
+      "coverage": [
+        "prefilter_recall",
+        "durable_fact",
+        "six_asset_kinds"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "A durable fact buried inside an otherwise chatty message. A precision-tuned filter would lose it.",
+      "id": "pm022"
+    },
+    {
+      "date": "2026-06-14",
+      "minute": 1155,
+      "senderId": "p01",
+      "text": "Huge thanks to Sneha, Aisha, Gopal and Harish for the camp yesterday — 41 animals, longest day we've had, and nobody complained once.",
+      "coverage": [
+        "participation_evidence",
+        "capability_coverage"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Post-event thanks naming several people, the second time. Satisfies 'more than once'.",
+      "id": "pm023"
+    },
+    {
+      "date": "2026-06-16",
+      "minute": 870,
+      "senderId": "p08",
+      "text": "Handing the microchip scanner over to Farhan today since I'm stepping back — he's used it more than me anyway.",
+      "coverage": [
+        "transfer_of_holding"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "One asset changing hands cleanly, so holdings history carries a closed row.",
+      "id": "pm024"
+    },
+    {
+      "date": "2026-06-18",
+      "minute": 1110,
+      "senderId": "p08",
+      "text": "Everyone, I'm moving to Pune next month so I'm stepping away from the rescue. It's been three good years. Please keep me on the list for the adoption day photos.",
+      "coverage": [
+        "lifecycle"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "The seeded departure, inside the window and before the live one.",
+      "id": "pm025"
+    },
+    {
+      "date": "2026-06-24",
+      "minute": 645,
+      "senderId": "p10",
+      "text": "Placed the three puppies from the Domlur intake with the Kulkarnis. That's the fourth placement I've handled this month, my spreadsheet is getting long.",
+      "coverage": [
+        "aggregation"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Second of three exposures inside foster placement.",
+      "id": "pm026"
+    },
+    {
+      "date": "2026-06-29",
+      "minute": 1320,
+      "senderId": "p11",
+      "text": "haha the cat did NOT agree with that assessment",
+      "coverage": [
+        "noise"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "A joke. Noise as a first-class outcome.",
+      "id": "pm027"
+    },
+    {
+      "date": "2026-07-06",
+      "minute": 600,
+      "senderId": "p20",
+      "text": "Hi all! Ananya here, Sneha mentioned you needed help with transport on weekends. Happy to start wherever's useful.",
+      "coverage": [
+        "lifecycle"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "The seeded arrival. The arrival brief has fired before it fires on camera.",
+      "id": "pm028"
+    },
+    {
+      "date": "2026-07-14",
+      "minute": 1065,
+      "senderId": "p15",
+      "text": "Might've left the scanner at the clinic, not sure",
+      "coverage": [
+        "suppression"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "A candidate finding resting on one throwaway mention. Must be suppressed, not raised.",
+      "id": "pm029"
+    },
+    {
+      "date": "2026-07-18",
+      "minute": 930,
+      "senderId": "p03",
+      "text": "Meeting Deepak at Green Paws next Tuesday about the renewal, and I'll have the numbers ready by end of the month.",
+      "coverage": [
+        "relative_dates",
+        "commitment"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "'next Tuesday' and 'end of the month', resolved against IST rather than UTC.",
+      "id": "pm030"
+    },
+    {
+      "date": "2026-07-22",
+      "minute": 795,
+      "senderId": "p01",
+      "text": "For the new folks — we don't pay Sunrise per visit. They invoice us once a month and we clear it at month end. Has been that way since March.",
+      "coverage": [
+        "restatement"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "The same fact stated again months later in different words. Bumps last_confirmed_at; must not insert a row.",
+      "id": "pm031"
+    },
+    {
+      "date": "2026-07-27",
+      "minute": 1185,
+      "senderId": "p18",
+      "text": "Posted the adoption day album to Instagram, 2000 views already",
+      "coverage": [
+        "provenance_forwarded_and_edited"
+      ],
+      "cases": [],
+      "flags": {
+        "editedTo": "Posted the adoption day album to Instagram, 4000 views already"
+      },
+      "note": "Later edited. The facts the old text produced are superseded rather than mutated.",
+      "id": "pm032"
+    },
+    {
+      "date": "2026-07-30",
+      "minute": 1230,
+      "senderId": "p12",
+      "text": "Sorry to ask again but does anyone have the current sterilisation rate? The Green Paws form needs it.",
+      "coverage": [
+        "answerable_question"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "The same operational figure asked a second time. This is what makes the coordinator's repetition visible.",
+      "id": "pm033"
+    },
+    {
+      "date": "2026-08-04",
+      "minute": 1080,
+      "senderId": "p10",
+      "text": "Two more placements this week, both through carers I know personally rather than the list. I should really write down who's actually active.",
+      "coverage": [
+        "aggregation"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Third of three exposures inside foster placement. Three separate exposures, one problem.",
+      "id": "pm034"
+    },
+    {
+      "date": "2026-08-11",
+      "minute": 885,
+      "senderId": "p01",
+      "text": "Heads up, Sunrise have changed their terms — it's fifteen days from invoice now, not month end. Effective from this month's bill.",
+      "coverage": [
+        "contradiction"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "A fact replaced by a later one. New row with supersedes_fact_id set, not a mutation.",
+      "id": "pm035"
+    },
+    {
+      "date": "2026-08-19",
+      "minute": 1005,
+      "senderId": "p07",
+      "text": "Did the microchipping at the camp last week, 22 done. Nobody else has been trained on the scanner yet.",
+      "coverage": [
+        "capability_coverage",
+        "relative_dates"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Reinforces the single-participant capability without ever characterising anyone. Also carries 'last week'.",
+      "id": "pm036"
+    },
+    {
+      "date": "2026-08-25",
+      "minute": 1140,
+      "senderId": "p03",
+      "text": "Green Paws are not renewing the sponsorship. Deepak confirmed it today, so that arrangement is finished as of this month.",
+      "coverage": [
+        "negation"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "An arrangement explicitly ended. Retires the fact rather than superseding it.",
+      "id": "pm037"
+    },
+    {
+      "date": "2026-08-28",
+      "minute": 720,
+      "senderId": "p16",
+      "text": "ok",
+      "coverage": [
+        "noise"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "An agreement fragment. The single most common message shape in any group chat.",
+      "id": "pm038"
+    },
+    {
+      "date": "2026-08-31",
+      "minute": 1275,
+      "senderId": "p19",
+      "text": "Van's at the service centre till Thursday so no pickups from my side, sorry",
+      "coverage": [
+        "noise"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Logistics chatter. Mentions an asset and changes nothing about who holds it.",
+      "id": "pm039"
+    },
+    {
+      "date": "2026-09-03",
+      "minute": 1155,
+      "senderId": "p02",
+      "text": "Anil, you should probably be on the bank account instead of me at this point — you're doing all the vendor payments anyway. Shall we sort it out?",
+      "coverage": [
+        "durable_fact"
+      ],
+      "cases": [
+        "approval"
+      ],
+      "flags": {},
+      "note": "THE APPROVAL. Deliberately ambiguous: this could also be read as Meera offering rather than a change being made.",
+      "id": "pm040"
+    },
+    {
+      "date": "2026-09-04",
+      "minute": 615,
+      "senderId": "p03",
+      "text": "Makes sense, let's talk at the weekend",
+      "coverage": [
+        "noise"
+      ],
+      "cases": [
+        "approval"
+      ],
+      "flags": {},
+      "note": "The reply that makes the approval case genuinely ambiguous rather than merely unconfirmed.",
+      "id": "pm041"
+    },
+    {
+      "date": "2026-09-09",
+      "minute": 1200,
+      "senderId": "p13",
+      "text": "I'll sort out the poster reprint for the next camp, need to check what's left in the store first.",
+      "coverage": [
+        "commitment"
+      ],
+      "cases": [
+        "restraint"
+      ],
+      "flags": {},
+      "note": "THE RESTRAINT. An undated intention, four days old, with nothing blocked on it. Must not be raised.",
+      "id": "pm042"
+    },
+    {
+      "date": "2026-09-11",
+      "minute": 960,
+      "senderId": "p10",
+      "text": "Someone should own the foster list properly, it can't keep living in my spreadsheet forever.",
+      "coverage": [
+        "aggregation"
+      ],
+      "cases": [],
+      "flags": {},
+      "note": "Sets up the foster-capacity finding without naming a person as the problem.",
+      "id": "pm043"
+    }
+  ],
+  "cases": {
+    "orphan": {
+      "description": "The donation page owner is the volunteer who leaves on camera, so the brief appears unprompted with an asset that now has no owner at all.",
+      "messageIds": [
+        "pm006"
+      ]
+    },
+    "restraint": {
+      "description": "A four-day-old undated promise with nothing blocked on it. Deliberately not raised, and the reasoning is on screen.",
+      "messageIds": [
+        "pm042"
+      ]
+    },
+    "stale_answer": {
+      "description": "The sterilisation rate, stated once in April and never since. Answered with its age attached rather than as a current figure.",
+      "messageIds": [
+        "pm008"
+      ]
+    },
+    "provenance_click": {
+      "description": "A brief line traceable to the five-month-old message that produced it, with its sender and date.",
+      "messageIds": [
+        "pm006"
+      ]
+    },
+    "approval": {
+      "description": "One ambiguous message about financial control changing hands. Baton stops and asks before writing rather than guessing.",
+      "messageIds": [
+        "pm040",
+        "pm041"
+      ]
+    }
+  },
+  "assertedByPlan": [
+    "aggregation",
+    "capability_coverage"
+  ]
+}

@@ -137,3 +137,159 @@ export const TELEGRAM_ALLOWED_UPDATES = [
   "chat_member",
   "my_chat_member",
 ] as const;
+
+/** An asset that has been retired is invisible to detection, like a retired fact. */
+export const ASSET_STATUSES = ["active", "retired"] as const;
+export type AssetStatus = (typeof ASSET_STATUSES)[number];
+
+/**
+ * Holdings are history: a transfer closes one row and opens another, and nothing
+ * is ever overwritten. `released` is therefore a closed row rather than a
+ * deletion, which is what makes "who held the van keys in March" answerable.
+ */
+export const HOLDING_STATUSES = ["active", "released"] as const;
+export type HoldingStatus = (typeof HOLDING_STATUSES)[number];
+
+/**
+ * `abandoned` is distinct from `completed` because an undated intention someone
+ * consciously decided not to do is not a loose end, and a brief should not
+ * inherit it.
+ */
+export const COMMITMENT_STATUSES = ["open", "completed", "abandoned"] as const;
+export type CommitmentStatus = (typeof COMMITMENT_STATUSES)[number];
+
+/**
+ * A finding's subject class. This is the column that distinguishes the two
+ * detection queries which both render as `sole_holder` — an asset with one
+ * holder and a capability with one observed participant. Five queries, four
+ * rendered subtypes, and this is where the fifth one goes.
+ */
+export const FINDING_TYPES = ["asset", "capability", "commitment"] as const;
+export type FindingType = (typeof FINDING_TYPES)[number];
+
+/**
+ * Where an ask is sent. Driven by `assets.sensitivity`: anything touching
+ * financial control, credentials or an individual's holdings goes to the
+ * coordinator privately, never in front of twenty people.
+ */
+export const QUESTION_TARGETS = ["group", "coordinator"] as const;
+export type QuestionTarget = (typeof QUESTION_TARGETS)[number];
+
+/**
+ * A pending change is never silently adopted on timeout and never discarded.
+ * `obsolete` is the third outcome: the answer arrived after the claim it was
+ * about had already been superseded.
+ */
+export const PENDING_CHANGE_STATUSES = ["pending", "applied", "rejected", "obsolete"] as const;
+export type PendingChangeStatus = (typeof PENDING_CHANGE_STATUSES)[number];
+
+/**
+ * Consequence is classified **deterministically** from the asset's kind and
+ * sensitivity — it is never asked of a model. Whether a write is
+ * high-consequence is fixed policy, and letting a cheap model decide would make
+ * the approval gate itself unreliable, which is the one thing that must not be.
+ * The model supplies confidence; code supplies consequence.
+ */
+export const CONSEQUENCE_LEVELS = ["low", "high"] as const;
+export type ConsequenceLevel = (typeof CONSEQUENCE_LEVELS)[number];
+
+/**
+ * The three produce paths Restraint gates. Recorded on every quiet decision so
+ * a test can assert the veto has not silently narrowed to findings during a
+ * refactor — which is exactly how a structural guarantee decays.
+ */
+export const QUIET_DECISION_SCOPES = ["finding", "brief_line", "answer"] as const;
+export type QuietDecisionScope = (typeof QUIET_DECISION_SCOPES)[number];
+
+/** What kind of pipeline execution a `runs` row records. */
+export const RUN_KINDS = ["backfill", "ingest", "sweep", "brief", "respond", "resume"] as const;
+export type RunKind = (typeof RUN_KINDS)[number];
+
+/**
+ * `interrupted` is a successful outcome, not a failure: the run stopped to ask
+ * the coordinator something and its snapshot is waiting in `agent_sessions`.
+ */
+export const RUN_STATUSES = ["running", "complete", "interrupted", "failed"] as const;
+export type RunStatus = (typeof RUN_STATUSES)[number];
+
+/**
+ * Same generator, same three sections, different opening line. An arrival brief
+ * is scoped to what currently has no owner or a single holder.
+ */
+export const BRIEF_KINDS = ["departure", "arrival"] as const;
+export type BriefKind = (typeof BRIEF_KINDS)[number];
+
+/**
+ * Non-text media is logged with the `unprocessed` flag rather than dropped, so
+ * a voice note that carried a fact is at least visible as a gap.
+ */
+export const MEDIA_KINDS = [
+  "photo",
+  "voice",
+  "audio",
+  "video",
+  "document",
+  "sticker",
+  "other",
+] as const;
+export type MediaKind = (typeof MEDIA_KINDS)[number];
+
+/** A snapshot is `open` until the answer arrives, then resumed once and closed. */
+export const AGENT_SESSION_STATUSES = ["open", "resumed", "closed"] as const;
+export type AgentSessionStatus = (typeof AGENT_SESSION_STATUSES)[number];
+
+/**
+ * The record kinds the Curator may extract. This is {@link CURATOR_CLASSIFICATIONS}
+ * without `noise`, because noise is a classification of the *message* and never
+ * produces a record — that asymmetry is the whole point of noise being a
+ * first-class outcome rather than an empty extraction.
+ */
+export const CURATOR_RECORD_KINDS = [
+  "durable_fact",
+  "commitment",
+  "participation_evidence",
+  "lifecycle_event",
+] as const satisfies readonly CuratorClassification[];
+export type CuratorRecordKind = (typeof CURATOR_RECORD_KINDS)[number];
+
+/** Lifecycle events the Curator can read out of prose, before Telegram confirms one. */
+export const LIFECYCLE_KINDS = ["joined", "left"] as const;
+export type LifecycleKind = (typeof LIFECYCLE_KINDS)[number];
+
+/**
+ * How the Cartographer resolved a mention. `cannot_determine` is a permitted
+ * output, not a failure: it becomes a question rather than a coin flip, which is
+ * the entire reason the model is invoked on ambiguity at all.
+ */
+export const IDENTITY_RESOLUTIONS = [
+  "resolved",
+  "ambiguous",
+  "cannot_determine",
+  "external",
+] as const;
+export type IdentityResolution = (typeof IDENTITY_RESOLUTIONS)[number];
+
+/** Restraint's verdict. A withheld item becomes a quiet decision, never a silent drop. */
+export const RESTRAINT_DECISIONS = ["surface", "withhold"] as const;
+export type RestraintDecision = (typeof RESTRAINT_DECISIONS)[number];
+
+/**
+ * The Respondent's four branches. The three that are not `answer` are its most
+ * valuable outputs — a tool that only speaks when it is certain is a tool nobody
+ * can calibrate — so they are branches of the schema rather than a free-text
+ * field the UI and the tests cannot depend on.
+ */
+export const RESPONDENT_OUTCOMES = [
+  "answer",
+  "stale_answer",
+  "ambiguous_holder",
+  "unknown",
+] as const;
+export type RespondentOutcome = (typeof RESPONDENT_OUTCOMES)[number];
+
+/**
+ * How old a fact must be before an answer quoting it carries a staleness
+ * warning. Five months is the planted case in the seeded transcript, so this
+ * threshold has to sit below that and above the ordinary rhythm of the group.
+ */
+export const STALE_FACT_THRESHOLD_DAYS = 90;

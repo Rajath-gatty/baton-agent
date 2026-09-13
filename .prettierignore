@@ -7,3 +7,7 @@ pnpm-lock.yaml
 docs/
 drizzle/
 *.tsbuildinfo
+
+# Generated, and compared byte for byte by scripts/test/seed-coverage.test.ts against
+# what seed-plan.ts writes. Formatting it would make that check fail on a clean tree.
+scripts/fixtures/

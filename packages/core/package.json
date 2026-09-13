@@ -29,7 +29,7 @@
     "typecheck": "tsc --build",
     "build": "tsc --build",
     "test": "vitest run",
-    "db:generate": "drizzle-kit generate",
+    "db:generate": "tsc --build && drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts"
   },
   "dependencies": {
