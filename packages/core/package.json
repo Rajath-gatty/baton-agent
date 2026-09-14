@@ -7,6 +7,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "//": "Exports point at dist, not src, because apps/worker and apps/web run as `node dist/main.js` in their containers. Consequence: core must be built before the apps run, which tsc project references handle for typecheck and the Dockerfiles handle for runtime.",
+  "//exports.db/testing": "The integration test harness. A separate entry point, deliberately not re-exported from ./db, so test-only code that truncates every table cannot load in a production container. Note: comment keys must stay OUT of `exports` — Node rejects an exports object mixing '.'-prefixed subpaths with plain keys.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -15,6 +16,10 @@
     "./db": {
       "types": "./dist/db/index.d.ts",
       "default": "./dist/db/index.js"
+    },
+    "./db/testing": {
+      "types": "./dist/db/testing.d.ts",
+      "default": "./dist/db/testing.js"
     },
     "./schemas": {
       "types": "./dist/schemas/index.d.ts",

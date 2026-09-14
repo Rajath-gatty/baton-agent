@@ -65,6 +65,9 @@ describe("schema shape", () => {
       "questions",
       "quiet_decisions",
       "runs",
+      // The worker's own bookkeeping: the polling offset and the sweep fingerprint,
+      // both of which have to survive a restart. Added with migration 0001.
+      "worker_state",
     ]);
   });
 });

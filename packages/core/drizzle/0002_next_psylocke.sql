@@ -1,0 +1,1 @@
+ALTER TABLE "facts" ADD COLUMN "value_signature" text;

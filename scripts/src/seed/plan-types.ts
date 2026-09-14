@@ -18,7 +18,13 @@
  * message could silently destroy the coverage row it exists to satisfy.
  */
 
-import type { AliasKind, AssetKind, AssetSensitivity, MediaKind } from "@baton/core";
+import type {
+  AliasKind,
+  AssetKind,
+  AssetSensitivity,
+  MediaKind,
+  SeedRenderedMessage,
+} from "@baton/core";
 
 /**
  * The coverage obligation, as data rather than prose, so the transcript can verify
@@ -191,22 +197,19 @@ export interface SeedPlan {
   assertedByPlan: CoverageRow[];
 }
 
-/** The transcript's output shape: one row per message, ready for the normaliser. */
-export interface RenderedMessage {
-  /** Deterministic and negative, so re-seeding is idempotent under the unique
-   * constraint on `(chat_id, telegram_message_id)` rather than duplicating six months. */
-  telegramMessageId: number;
-  /** ISO 8601 with the group's offset. */
-  sentAt: string;
-  senderPlanId: string;
-  senderDisplayName: string;
-  text: string | null;
-  replyToTelegramMessageId: number | null;
-  isForwarded: boolean;
-  forwardedFrom: string | null;
-  isEdited: boolean;
-  editedText: string | null;
-  mediaKind: MediaKind | null;
+/**
+ * The transcript's output shape: one row per message, ready for the normaliser.
+ *
+ * The message fields themselves — id, timestamp, sender, text, provenance flags,
+ * media — come from `SeedRenderedMessage` in `@baton/core`, which is what the
+ * worker's normaliser consumes. Extending it rather than restating it means the
+ * renderer cannot drift from the normaliser: dropping or renaming a field here is a
+ * type error rather than a seeded behaviour path that silently stops working.
+ *
+ * What this adds is the renderer's own bookkeeping, which has no column in
+ * `messages` and exists for the coverage report's traceability.
+ */
+export interface RenderedMessage extends SeedRenderedMessage {
   /** Present only on placed messages. Filler carries no coverage obligation. */
   planMessageId: string | null;
   coverage: CoverageRow[];

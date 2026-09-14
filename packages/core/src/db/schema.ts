@@ -241,6 +241,20 @@ export const messages = pgTable(
     /** Null means not yet curated. An edit resets it, which re-curates. */
     curatedAt: timestamp("curated_at", { withTimezone: true }),
 
+    /**
+     * A question directed at Baton: an @-mention, or a reply to one of its messages, and
+     * nothing else. Persisted rather than re-derived because the reply signal needs the
+     * replied-to message's *sender*, and the bot's own messages are never stored — so
+     * after intake the fact is unrecoverable from this table alone.
+     */
+    isQuestionToBot: boolean("is_question_to_bot").notNull().default(false),
+    /**
+     * When Baton replied. **This is what makes answering idempotent**: without it, every
+     * pass would re-answer every question ever asked, and a restart would re-answer the
+     * whole transcript in front of the group.
+     */
+    questionAnsweredAt: timestamp("question_answered_at", { withTimezone: true }),
+
     createdAt: createdAt(),
   },
   (table) => [
@@ -255,6 +269,11 @@ export const messages = pgTable(
     ),
     /** The processing loop's only query: candidates not yet curated. */
     index("messages_prefilter_verdict_curated_at_idx").on(table.prefilterVerdict, table.curatedAt),
+    /** The respond pass's only query: questions to Baton not yet answered. */
+    index("messages_is_question_to_bot_answered_idx").on(
+      table.isQuestionToBot,
+      table.questionAnsweredAt,
+    ),
     /**
      * Supersession is order-dependent — a contradiction processed backwards
      * silently inverts a fact — so the processing loop reads in strict `sent_at`
@@ -343,6 +362,20 @@ export const facts = pgTable(
      * and bumps `last_confirmed_at`; only a contradiction inserts a new row.
      */
     matchKey: text("match_key").notNull(),
+    /**
+     * How a restatement is told from a contradiction **within** a `match_key` group.
+     *
+     * Cached on the row for the same reason `match_key` is: it is derived, but the
+     * derivation needs inputs the row does not otherwise keep. A holder claim is signed
+     * by *who* holds the thing, and `facts` deliberately has no holder column — that
+     * lives in `holdings`, as history. Recomputing would mean reaching through
+     * `holdings.evidence_fact_id` to reconstruct what this claim once said, which is
+     * both indirect and wrong once the holding has moved on.
+     *
+     * Equal signatures merge and bump `last_confirmed_at`; unequal signatures insert a
+     * new row and set `supersedes_fact_id`.
+     */
+    valueSignature: text("value_signature"),
     confidence: real("confidence").notNull(),
     /**
      * Only `active` is visible to detection SQL. `unverified` and
@@ -776,4 +809,38 @@ export const appSettings = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   () => [check("app_settings_single_row", sql`id = 1`)],
+);
+
+/**
+ * The worker's own bookkeeping. One row, like the two above.
+ *
+ * Distinct from `app_settings`, which is configuration a human sets, and from
+ * `coordinator_state`, which is what a *reader* has seen. This is what the *process*
+ * has done, and all three columns exist because the alternative is worse:
+ *
+ *   - `telegram_offset` — held here rather than in memory because the offset is
+ *     committed **after** processing. In memory it would reset on every restart and
+ *     Telegram would redeliver whatever it still holds, which is survivable only
+ *     because intake upserts. On disk it makes restarts cheap instead of merely safe.
+ *   - `last_sweep_fingerprint` — the periodic sweep short-circuits when the candidate
+ *     set is unchanged, and that comparison has to survive a restart or the first
+ *     sweep after every deploy pays for a full assessment that produces nothing new.
+ *   - `last_sweep_at` — so the scheduler can tell "never swept" from "swept an hour
+ *     ago", which are different decisions.
+ */
+export const workerState = pgTable(
+  "worker_state",
+  {
+    id: smallint("id").primaryKey().default(1),
+    /** Telegram's `getUpdates` offset: the next update id to ask for. */
+    telegramOffset: bigint("telegram_offset", { mode: "number" }),
+    /**
+     * A digest of the last sweep's candidate set. Compared before invoking `assess`,
+     * so an unchanged register costs no model call at all.
+     */
+    lastSweepFingerprint: text("last_sweep_fingerprint"),
+    lastSweepAt: timestamp("last_sweep_at", { withTimezone: true }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  () => [check("worker_state_single_row", sql`id = 1`)],
 );

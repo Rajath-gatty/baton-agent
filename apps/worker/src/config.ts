@@ -70,6 +70,32 @@ const configSchema = z
 
 export type WorkerConfig = z.infer<typeof configSchema>;
 
+/**
+ * The Telegram accounts permitted to answer an approval.
+ *
+ * `COORDINATOR_TELEGRAM_ID` accepts a **comma-separated list**, because a demo is operated
+ * by more than one person and both need to be able to approve. The singular name is kept
+ * because the product concept is singular: `app_settings.coordinator_person_id` is the one
+ * coordinator the UI names and the one an approval is addressed to. This list is the
+ * separate question of who may *answer*, and it exists so a second operator is not locked
+ * out by a column that holds one id.
+ *
+ * What it is emphatically **not** is a widening of who may approve in general. Everyone on
+ * this list is an operator named in the environment; a volunteer's "yes" is still not an
+ * approval, which is the property the gate exists to protect.
+ */
+export function coordinatorTelegramIds(config: WorkerConfig): number[] {
+  return (
+    config.COORDINATOR_TELEGRAM_ID.split(",")
+      .map((part) => part.trim())
+      .filter((part) => part !== "")
+      .map((part) => Number(part))
+      // A non-numeric entry is dropped rather than becoming NaN, which would match nothing
+      // and read as "the coordinator cannot approve" with no explanation anywhere.
+      .filter((id) => Number.isSafeInteger(id))
+  );
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): WorkerConfig {
   const parsed = configSchema.safeParse(env);
   if (!parsed.success) {
