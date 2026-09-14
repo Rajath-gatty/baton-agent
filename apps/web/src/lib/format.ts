@@ -8,12 +8,7 @@
  * because that is the only currency the group counts in.
  */
 
-import type {
-  AssetKind,
-  FactStatus,
-  FindingSeverity,
-  FindingSubtype,
-} from "@baton/core";
+import type { AssetKind, FactStatus, FindingSeverity, FindingSubtype } from "@baton/core";
 
 /**
  * The organisation's timezone. Not exported from core (core is server-agnostic

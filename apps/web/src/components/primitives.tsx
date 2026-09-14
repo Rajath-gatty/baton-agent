@@ -85,8 +85,7 @@ export function Confidence({ value }: { value: number }) {
           aria-hidden="true"
           className="block h-[0.5rem] w-[3px]"
           style={{
-            backgroundColor:
-              i < filled ? "var(--color-signal)" : "var(--color-rule-strong)",
+            backgroundColor: i < filled ? "var(--color-signal)" : "var(--color-rule-strong)",
           }}
         />
       ))}

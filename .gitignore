@@ -3,6 +3,9 @@
 # docs/superpowers/
 docs/hackathon-ideas.json
 
+# Long-form explanatory articles — drafts, not submission material.
+articles/
+
 .codegraph
 
 # Environment and secrets

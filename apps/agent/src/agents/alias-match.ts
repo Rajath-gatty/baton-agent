@@ -14,25 +14,17 @@
  * guess about who holds financial control is invisible once written.
  */
 
-import type { AliasEntry } from "@baton/core";
+import { normaliseAlias, type AliasEntry } from "@baton/core";
+
+export { normaliseAlias };
 
 /**
  * Case-folds, strips the leading `@` of a handle, removes punctuation and collapses
- * whitespace. "Priya!", "@priya", "  PRIYA " all normalise to "priya".
- *
- * `\p{M}` — combining marks — is kept alongside letters and numbers, and that is not
- * incidental. Devanagari vowel signs and the virama are marks rather than letters, so
- * a class of `\p{L}\p{N}` alone turns "प्रिया" into "परय": a different string, matching
- * nothing, for a roster where names are written in more than one script.
+ * whitespace. Re-exported from `@baton/core` rather than defined here, because
+ * `person_aliases.normalised_alias` is **written** with the same function when
+ * identity is loaded. Two copies would mean every mention escalating to the model for
+ * clarification, with nothing appearing broken.
  */
-export function normaliseAlias(raw: string): string {
-  return raw
-    .toLowerCase()
-    .replace(/^@+/, "")
-    .replace(/[^\p{L}\p{N}\p{M}\s]/gu, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 /** Levenshtein distance, capped — anything past the cap is "too far" and stops early. */
 export function editDistanceWithin(a: string, b: string, cap: number): number | null {

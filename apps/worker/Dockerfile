@@ -48,9 +48,14 @@ RUN pnpm install --frozen-lockfile --prod --filter @baton/worker... --filter @ba
 # Unauthenticated /health, for Coolify's health check. Pointing a health check at
 # the token-protected data API would return 401, read as unhealthy, and
 # restart-loop past the worker's own backoff.
+#
+# The probe reads PORT so it follows the app rather than drifting from it: a
+# compose file that sets PORT to anything else would otherwise leave a healthy
+# container reporting unhealthy forever. Shell form, so the variable expands at
+# runtime.
 EXPOSE 8081
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD wget -qO- http://127.0.0.1:8081/health || exit 1
+  CMD wget -qO- "http://127.0.0.1:${PORT:-8081}/health" || exit 1
 
 WORKDIR /repo/apps/worker
 CMD ["node", "dist/main.js"]

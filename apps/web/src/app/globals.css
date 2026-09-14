@@ -46,8 +46,7 @@
   --color-status-held: #8c3a22;
   --color-status-closed: #6b7278;
 
-  --font-sans:
-    var(--font-barlow), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-board: var(--font-barlow-condensed), var(--font-barlow), ui-sans-serif, sans-serif;
 
   /* Fixed rem scale at a ~1.2 ratio. Not fluid: product UI is read at a

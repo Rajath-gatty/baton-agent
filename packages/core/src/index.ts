@@ -12,6 +12,8 @@
  */
 
 export * from "./constants.js";
+export * from "./alias.js";
+export * from "./env.js";
 export * from "./redact.js";
 export * from "./schemas/index.js";
 export * from "./prompts/index.js";

@@ -44,24 +44,20 @@ const DIFF_KIND_LABEL: Record<"added" | "changed" | "resolved" | "withheld", str
 };
 
 export default async function ContinuityPage() {
-  const [stateSentence, diffs, questions, unreadBrief, register, quiet] =
-    await Promise.all([
-      getStateSentence(),
-      getSinceYouLastLooked(),
-      getOpenQuestions(),
-      getUnreadBrief(),
-      getRegister(),
-      getQuietDecisions(),
-    ]);
+  const [stateSentence, diffs, questions, unreadBrief, register, quiet] = await Promise.all([
+    getStateSentence(),
+    getSinceYouLastLooked(),
+    getOpenQuestions(),
+    getUnreadBrief(),
+    getRegister(),
+    getQuietDecisions(),
+  ]);
 
   const openQuestionCount = questions.filter((q) => q.status === "asked").length;
 
   return (
     <>
-      <main
-        className="mx-auto w-full px-6 py-4"
-        style={{ maxWidth: "78rem" }}
-      >
+      <main className="mx-auto w-full px-6 py-4" style={{ maxWidth: "78rem" }}>
         {/* 2 — The state of the organisation in one sentence. The focal point. */}
         <section aria-labelledby="state-heading">
           <Eyebrow>The state of the organisation</Eyebrow>
@@ -82,10 +78,7 @@ export default async function ContinuityPage() {
 
         {/* 3 + 4 — Since-you-last-looked and the waiting-on line share one
             compact meta band, to keep the register above the fold. */}
-        <div
-          className="mt-4 grid gap-4"
-          style={{ gridTemplateColumns: "minmax(0, 1fr) 22rem" }}
-        >
+        <div className="mt-4 grid gap-4" style={{ gridTemplateColumns: "minmax(0, 1fr) 22rem" }}>
           {/* 3 — Since you last looked. */}
           <section aria-labelledby="diff-heading">
             <Eyebrow>Since you last looked</Eyebrow>
@@ -162,9 +155,7 @@ export default async function ContinuityPage() {
                           textTransform: "uppercase",
                           fontWeight: 600,
                           color:
-                            q.status === "asked"
-                              ? "var(--color-signal)"
-                              : "var(--color-ink-faint)",
+                            q.status === "asked" ? "var(--color-signal)" : "var(--color-ink-faint)",
                         }}
                       >
                         {q.status === "asked" ? "Asked" : "Queued"}
@@ -181,9 +172,8 @@ export default async function ContinuityPage() {
                   }}
                 >
                   {openQuestionCount} of {ASK_BUDGET.maxOpen} open · at most{" "}
-                  {ASK_BUDGET.maxPerRollingWindow} asked in{" "}
-                  {ASK_BUDGET.rollingWindowHours} hours. Baton rations what it
-                  asks so the group is never crowded.
+                  {ASK_BUDGET.maxPerRollingWindow} asked in {ASK_BUDGET.rollingWindowHours} hours.
+                  Baton rations what it asks so the group is never crowded.
                 </p>
               </>
             )}
@@ -271,9 +261,9 @@ export default async function ContinuityPage() {
                   marginTop: "0.375rem",
                 }}
               >
-                Every capability the group relies on has been seen in more than one pair
-                of hands. Baton is still reading the chat; a new exposure will appear here
-                the moment one is found.
+                Every capability the group relies on has been seen in more than one pair of hands.
+                Baton is still reading the chat; a new exposure will appear here the moment one is
+                found.
               </p>
             </div>
           ) : (
@@ -285,10 +275,7 @@ export default async function ContinuityPage() {
           )}
 
           {/* Register footer → dismissed. */}
-          <div
-            className="px-6 py-2"
-            style={{ borderTop: "1px solid var(--color-rule)" }}
-          >
+          <div className="px-6 py-2" style={{ borderTop: "1px solid var(--color-rule)" }}>
             <Link
               href="/dismissed"
               className="board-type"

@@ -62,8 +62,8 @@ function Gate({ expired }: { expired: boolean }) {
         Baton
       </h1>
       <p className="text-dense text-ink-muted mt-3 max-w-prose">
-        The standing record of what your group knows and who alone holds it, read
-        from the one chat that holds its history.
+        The standing record of what your group knows and who alone holds it, read from the one chat
+        that holds its history.
       </p>
 
       <hr className="border-0 border-t border-rule my-6" />
@@ -85,11 +85,7 @@ function Gate({ expired }: { expired: boolean }) {
             placeholder="••••••••"
             aria-invalid={invalid || rateLimited}
             aria-describedby={notice ? "gate-notice" : undefined}
-            style={
-              invalid || rateLimited
-                ? { borderColor: "var(--color-status-held)" }
-                : undefined
-            }
+            style={invalid || rateLimited ? { borderColor: "var(--color-status-held)" } : undefined}
           />
         </div>
 
@@ -104,10 +100,7 @@ function Gate({ expired }: { expired: boolean }) {
         aria-live="polite"
         className="text-meta mt-4 min-h-[1.25rem]"
         style={{
-          color:
-            noticeTone === "held"
-              ? "var(--color-status-held)"
-              : "var(--color-ink-faint)",
+          color: noticeTone === "held" ? "var(--color-status-held)" : "var(--color-ink-faint)",
         }}
       >
         {notice}

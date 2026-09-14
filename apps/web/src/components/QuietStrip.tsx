@@ -38,9 +38,7 @@ export function QuietStrip({ decisions }: { decisions: QuietDecision[] }) {
       <div className="flex items-baseline justify-between px-6 pt-3 pb-1">
         <div className="flex items-baseline gap-3">
           <Eyebrow>What Baton held back</Eyebrow>
-          <span
-            style={{ fontSize: "var(--text-meta)", color: "var(--color-ink-faint)" }}
-          >
+          <span style={{ fontSize: "var(--text-meta)", color: "var(--color-ink-faint)" }}>
             Recorded on purpose, shown next to what it raised
           </span>
         </div>
@@ -62,9 +60,11 @@ export function QuietStrip({ decisions }: { decisions: QuietDecision[] }) {
 
       {decisions.length === 0 ? (
         // Good news, not a blank: nothing withheld this pass.
-        <p className="px-6 pb-3" style={{ fontSize: "var(--text-dense)", color: "var(--color-ink-muted)" }}>
-          Nothing was held back this pass — everything the register found is on the
-          sheet above.
+        <p
+          className="px-6 pb-3"
+          style={{ fontSize: "var(--text-dense)", color: "var(--color-ink-muted)" }}
+        >
+          Nothing was held back this pass — everything the register found is on the sheet above.
         </p>
       ) : (
         <ul className="px-6 pb-3">

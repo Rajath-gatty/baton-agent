@@ -24,11 +24,7 @@ import { containsCredential, redactCredentials } from "@baton/core";
 import type { Fact, Holding } from "@/lib/types";
 import { getFact, getHoldingsByKind } from "@/lib/data";
 import { factStatusLabel, formatDate, formatDateTime } from "@/lib/format";
-import {
-  OPEN_FACT_EVENT,
-  StatusCode,
-  type OpenFactDetail,
-} from "@/components/primitives";
+import { OPEN_FACT_EVENT, StatusCode, type OpenFactDetail } from "@/components/primitives";
 
 /** What the panel is doing right now. Drives the seven states below. */
 type PanelPhase =
@@ -85,8 +81,7 @@ export function FactPanel() {
     } catch (cause) {
       setPhase({
         kind: "error",
-        message:
-          cause instanceof Error ? cause.message : "The fact could not be loaded.",
+        message: cause instanceof Error ? cause.message : "The fact could not be loaded.",
       });
     }
   }, []);
@@ -137,12 +132,7 @@ export function FactPanel() {
           <p className="eyebrow" id="fact-panel-title">
             Fact — provenance
           </p>
-          <button
-            type="button"
-            className="btn"
-            onClick={close}
-            aria-label="Close fact panel"
-          >
+          <button type="button" className="btn" onClick={close} aria-label="Close fact panel">
             Close
           </button>
         </header>
@@ -160,11 +150,7 @@ export function FactPanel() {
         </div>
 
         <footer className="flex items-center justify-end gap-2 border-t border-[color:var(--color-rule)] px-5 py-3">
-          <FactActions
-            phase={phase}
-            pendingAction={pendingAction}
-            onAction={runAction}
-          />
+          <FactActions phase={phase} pendingAction={pendingAction} onAction={runAction} />
         </footer>
       </div>
     </dialog>
@@ -173,15 +159,7 @@ export function FactPanel() {
 
 // ── body ────────────────────────────────────────────────────────────────────
 
-function FactBody({
-  fact,
-  chain,
-  holdings,
-}: {
-  fact: Fact;
-  chain: Fact[];
-  holdings: Holding[];
-}) {
+function FactBody({ fact, chain, holdings }: { fact: Fact; chain: Fact[]; holdings: Holding[] }) {
   return (
     <div className="flex flex-col gap-5">
       {/* The claim and its status. */}
@@ -196,8 +174,7 @@ function FactBody({
           <StatusCode status={fact.status} />
         </div>
         <p className="mt-1 text-meta text-[color:var(--color-ink-muted)]">
-          {fact.topic} · Recorded {formatDate(fact.recordedAt)} ·{" "}
-          {factStatusLabel(fact.status)}
+          {fact.topic} · Recorded {formatDate(fact.recordedAt)} · {factStatusLabel(fact.status)}
         </p>
       </section>
 
@@ -215,9 +192,7 @@ function FactBody({
         <p className="eyebrow" id="fact-reasoning-heading">
           Why Baton stored this
         </p>
-        <p className="mt-1.5 text-body text-[color:var(--color-ink-muted)]">
-          {reasoningFor(fact)}
-        </p>
+        <p className="mt-1.5 text-body text-[color:var(--color-ink-muted)]">{reasoningFor(fact)}</p>
       </section>
     </div>
   );
@@ -234,8 +209,7 @@ function HolderHistory({ holdings }: { holdings: Holding[] }) {
           Holding history
         </p>
         <p className="mt-1.5 text-body text-[color:var(--color-ink-muted)]">
-          No holding has been recorded against this — it rests on no single pair
-          of hands.
+          No holding has been recorded against this — it rests on no single pair of hands.
         </p>
       </section>
     );
@@ -298,14 +272,13 @@ function SourceQuote({ fact }: { fact: Fact }) {
           &ldquo;{redacted}&rdquo;
         </blockquote>
         <figcaption className="mt-1 text-meta text-[color:var(--color-ink-muted)]">
-          {fact.sourceMessage.authorName} ·{" "}
-          {formatDateTime(fact.sourceMessage.sentAt)}
+          {fact.sourceMessage.authorName} · {formatDateTime(fact.sourceMessage.sentAt)}
         </figcaption>
       </figure>
       {wasRedacted ? (
         <p className="mt-1.5 text-meta text-[color:var(--color-ink-faint)]">
-          A credential in the original was removed for display. The register
-          never stores a secret as a fact — only who holds one.
+          A credential in the original was removed for display. The register never stores a secret
+          as a fact — only who holds one.
         </p>
       ) : null}
     </section>
@@ -330,9 +303,7 @@ function SupersessionChain({ chain }: { chain: Fact[] }) {
           >
             <StatusCode status={prior.status} />
             <div>
-              <p className="text-body text-[color:var(--color-ink-muted)]">
-                {prior.statement}
-              </p>
+              <p className="text-body text-[color:var(--color-ink-muted)]">{prior.statement}</p>
               <p className="mt-0.5 text-meta text-[color:var(--color-ink-faint)]">
                 Recorded {formatDate(prior.recordedAt)}
               </p>
@@ -371,8 +342,7 @@ function FactActions({
     <>
       {ACTIONS.map((action) => {
         const isVerify = action.key === "verify";
-        const disabled =
-          !ready || busy || (isVerify && !verifiable);
+        const disabled = !ready || busy || (isVerify && !verifiable);
         const pending = pendingAction === action.key;
         return (
           <button
@@ -416,12 +386,10 @@ function FactSkeleton() {
 function EmptyState() {
   return (
     <div className="py-8">
-      <p className="board-type text-lead text-[color:var(--color-ink)]">
-        Nothing to trace here.
-      </p>
+      <p className="board-type text-lead text-[color:var(--color-ink)]">Nothing to trace here.</p>
       <p className="mt-1 text-body text-[color:var(--color-ink-muted)]">
-        This claim has no fact behind it in the register — there is nothing
-        standing that needs an owner.
+        This claim has no fact behind it in the register — there is nothing standing that needs an
+        owner.
       </p>
     </div>
   );

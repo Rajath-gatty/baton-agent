@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/main.ts",
+    "dev": "tsx watch dev.ts",
     "start": "node dist/main.js",
     "typecheck": "tsc --build",
     "build": "tsc --build",

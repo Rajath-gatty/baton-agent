@@ -7,7 +7,12 @@
  * answers by restarting the container. That restart loop would bypass the
  * worker's own exponential backoff — the mechanism added specifically to stop
  * unattended retry storms — while also re-running migrations and disturbing the
- * polling offset on every cycle. It must not be published on the public domain.
+ * polling offset on every cycle.
+ *
+ * It shares a port with `/data/*`, so it is reachable on the public domain. That
+ * is accepted rather than prevented — it returns a status and nothing else, and
+ * separating it onto an unrouted second listener would be machinery bought for
+ * no gain. It must therefore stay free of anything worth authenticating.
  *
  * `/data/*` is the read-only API the agent's Strands tools call, behind a bearer
  * token, routed publicly by Coolify because the AgentCore container reaches it

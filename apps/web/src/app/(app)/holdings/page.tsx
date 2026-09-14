@@ -25,11 +25,7 @@ import Link from "next/link";
 import type { AssetKind, FactStatus } from "@baton/core";
 import { getHoldingsByKind, type HoldingsGroup } from "@/lib/data";
 import type { Asset, Holding } from "@/lib/types";
-import {
-  assetKindLabel,
-  formatDate,
-  formatRelativeAge,
-} from "@/lib/format";
+import { assetKindLabel, formatDate, formatRelativeAge } from "@/lib/format";
 import { Confidence, Eyebrow, Sheet, StatusCode } from "@/components/primitives";
 
 export const metadata = {
@@ -293,9 +289,7 @@ function UnheldCell() {
   return (
     <Td>
       <span className="text-dense text-status-held board-type">No one seen</span>
-      <span className="sr-only">
-        No one has been seen holding this; it rests unowned.
-      </span>
+      <span className="sr-only">No one has been seen holding this; it rests unowned.</span>
     </Td>
   );
 }
@@ -322,13 +316,7 @@ function HolderCell({ holding }: { holding: Holding }) {
 
 // ── header & body cells ──────────────────────────────────────────────────────
 
-function Th({
-  children,
-  align = "left",
-}: {
-  children: React.ReactNode;
-  align?: "left" | "right";
-}) {
+function Th({ children, align = "left" }: { children: React.ReactNode; align?: "left" | "right" }) {
   return (
     <th
       scope="col"
@@ -339,13 +327,7 @@ function Th({
   );
 }
 
-function Td({
-  children,
-  align = "left",
-}: {
-  children: React.ReactNode;
-  align?: "left" | "right";
-}) {
+function Td({ children, align = "left" }: { children: React.ReactNode; align?: "left" | "right" }) {
   return (
     <td className={`self-baseline ${align === "right" ? "text-right" : "text-left"}`}>
       {children}

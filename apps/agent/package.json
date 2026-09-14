@@ -5,12 +5,16 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch dev.ts",
     "start": "node dist/server.js",
     "typecheck": "tsc --build",
     "build": "tsc --build",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "smoke:g1": "tsx smoke/g1-provider.ts",
+    "smoke:g1-stub": "tsx smoke/g1-stub.ts",
+    "smoke:g2": "tsx smoke/g2-structured.ts"
   },
+  "//smoke": "Phase 0 gates. They cost real tokens and need network, so they are never part of `pnpm test` — a unit suite that silently bills a provider is a trap.",
   "//": "No database client here, by design. The AgentCore container holds no database credentials, and the root ESLint config fails on any import of pg, postgres, drizzle-orm or @baton/core/db.",
   "//zod": "Zod 4 here, Zod 3 in packages/core, deliberately. @strands-agents/sdk peer-depends on zod ^4.1.12 and calls Zod 4 APIs (z.toJSONSchema) while its own barrel initialises, so importing the SDK at all requires v4 — this is a runtime failure, not a typing one. Core stays on v3 because its schemas are shared with Drizzle and the web app. The two never meet: this workspace imports no Zod at all (see src/model/structured.ts SchemaValidator), and core's schema objects only ever have safeParse called on them, which is instance-local.",
   "dependencies": {

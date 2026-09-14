@@ -350,13 +350,21 @@ context is hydrated into the request payload; tools exist for pull-based lookups
 it needs in advance, chiefly drilling into evidence. Tool calls appear in traces, which is what feeds
 the agent activity panel.
 
-**The worker also serves an unauthenticated `GET /health`**, separate from the data API path and not
-published on the public domain. This exists for Coolify, not for the product: Coolify's health checks
-want an HTTP endpoint, and pointing one at the token-protected data API returns 401, which Coolify reads
-as unhealthy and answers by restarting the container. That restart loop would bypass the worker's own
-exponential backoff — the mechanism specifically added to stop unattended retry storms — while also
-re-running migrations and disturbing the polling offset on every cycle. The endpoint returns a plain 200
-after the database connection is established, and nothing else.
+**The worker also serves an unauthenticated `GET /health`**, on a separate path from the data API but on
+the same port, and therefore reachable on the public domain. That is accepted rather than prevented: it
+returns a status and nothing else, so it must simply stay free of anything worth authenticating.
+Separating it onto a second unrouted listener would be machinery bought for no gain. The endpoint exists
+for Coolify, not for the product: Coolify's health checks want an HTTP endpoint, and pointing one at the
+token-protected data API returns 401, which Coolify reads as unhealthy and answers by restarting the
+container. That restart loop would bypass the worker's own exponential backoff — the mechanism
+specifically added to stop unattended retry storms — while also re-running migrations and disturbing the
+polling offset on every cycle. The endpoint returns a plain 200 after the database connection is
+established, and nothing else.
+
+**Coolify routes each service from a domain assigned in its UI, and that domain must carry the port**,
+because neither the worker (8081) nor web (3000) listens on 80. The port-suffixed `SERVICE_FQDN_*` magic
+variables are the documented alternative but have open bugs binding the wrong value across multiple
+services, so the UI is the path to use.
 
 ### Models per agent
 

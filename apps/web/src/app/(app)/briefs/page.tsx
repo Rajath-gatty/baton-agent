@@ -54,9 +54,9 @@ export default async function BriefsPage() {
           </Link>
         </div>
         <p className="text-dense text-ink-muted mt-3 max-w-prose">
-          When a volunteer steps back or a period closes, Baton writes down what
-          that leaves the organisation exposed to. Each line traces to the fact
-          it rests on, and can be filed as a record without anyone being messaged.
+          When a volunteer steps back or a period closes, Baton writes down what that leaves the
+          organisation exposed to. Each line traces to the fact it rests on, and can be filed as a
+          record without anyone being messaged.
         </p>
       </header>
 

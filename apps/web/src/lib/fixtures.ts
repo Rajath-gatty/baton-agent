@@ -223,8 +223,7 @@ export const facts: Fact[] = [
   {
     id: "f-feeding",
     status: "active",
-    statement:
-      "The Koramangala 5th-block feeding round runs the established route and timings.",
+    statement: "The Koramangala 5th-block feeding round runs the established route and timings.",
     sourceMessage: msg("m-feeding"),
     supersedes: null,
     topic: "Route — Koramangala feeding",
@@ -468,16 +467,14 @@ export const findings: Finding[] = [
     severity: "low",
     status: "dismissed",
     title: "Medicine ordering had appeared to rest with one person",
-    whyItMatters:
-      "The monthly medicine order is placed with one wholesaler by one volunteer.",
+    whyItMatters: "The monthly medicine order is placed with one wholesaler by one volunteer.",
     evidenceCount: 3,
     confidence: 0.52,
     holderName: "Sana Qureshi",
     dedupeKey: "sole_holder:medicine-order",
     firstSeenAt: "2026-06-10T02:00:00+05:30",
     lastSeenAt: "2026-09-09T02:00:00+05:30",
-    assessorReasoning:
-      "Ordering messages came from one volunteer across three months.",
+    assessorReasoning: "Ordering messages came from one volunteer across three months.",
     dismissalReason: "we already have a backup",
   },
   {
@@ -486,16 +483,14 @@ export const findings: Finding[] = [
     severity: "low",
     status: "dismissed",
     title: "A feeding-round hand-off had looked incomplete",
-    whyItMatters:
-      "The Koramangala feeding round changed hands without a formal record.",
+    whyItMatters: "The Koramangala feeding round changed hands without a formal record.",
     evidenceCount: 2,
     confidence: 0.4,
     holderName: null,
     dedupeKey: "loose_end:feeding-handoff",
     firstSeenAt: "2026-08-16T02:00:00+05:30",
     lastSeenAt: "2026-08-20T02:00:00+05:30",
-    assessorReasoning:
-      "A route hand-off was mentioned without a confirming acknowledgement.",
+    assessorReasoning: "A route hand-off was mentioned without a confirming acknowledgement.",
     dismissalReason: "the hand-off was confirmed in the drive the following week",
   },
 ];

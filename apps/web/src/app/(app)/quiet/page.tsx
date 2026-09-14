@@ -50,10 +50,9 @@ export default async function QuietPage() {
           </Link>
         </div>
         <p className="text-dense text-ink-muted mt-3 max-w-prose">
-          Every time Baton held something back — a finding it did not raise, a
-          number it would not put on the sheet — it wrote down the choice and the
-          reason. The reasons are about the item or the register, never about a
-          volunteer.
+          Every time Baton held something back — a finding it did not raise, a number it would not
+          put on the sheet — it wrote down the choice and the reason. The reasons are about the item
+          or the register, never about a volunteer.
         </p>
       </header>
 
@@ -77,8 +76,8 @@ function EmptyQuiet() {
   return (
     <Sheet className="px-6 py-8">
       <p className="text-body text-ink">
-        Nothing has been held back. Every judgement Baton has made is already on
-        the register — there is no quieter layer beneath it.
+        Nothing has been held back. Every judgement Baton has made is already on the register —
+        there is no quieter layer beneath it.
       </p>
     </Sheet>
   );
@@ -117,14 +116,10 @@ function QuietRow({ decision, run }: { decision: QuietDecision; run: Run | null 
           {run ? (
             <>
               <span className="board-type text-ink">{run.id}</span>{" "}
-              <span className="text-ink-faint">
-                · the pass of {formatDate(run.startedAt)}
-              </span>
+              <span className="text-ink-faint">· the pass of {formatDate(run.startedAt)}</span>
             </>
           ) : (
-            <span className="text-ink-faint">
-              a pass before the earliest run on record
-            </span>
+            <span className="text-ink-faint">a pass before the earliest run on record</span>
           )}
         </dd>
       </dl>

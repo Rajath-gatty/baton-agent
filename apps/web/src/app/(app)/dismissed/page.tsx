@@ -17,12 +17,7 @@
 import Link from "next/link";
 import type { Finding } from "@/lib/types";
 import { getDismissedFindings } from "@/lib/data";
-import {
-  formatDate,
-  formatRelativeAge,
-  severityLabel,
-  subtypeLabel,
-} from "@/lib/format";
+import { formatDate, formatRelativeAge, severityLabel, subtypeLabel } from "@/lib/format";
 import { Confidence, Eyebrow, Sheet } from "@/components/primitives";
 
 export const metadata = {
@@ -48,9 +43,8 @@ export default async function DismissedPage() {
           </Link>
         </div>
         <p className="text-dense text-ink-muted mt-3 max-w-prose">
-          Exposures the coordinator judged and put down, each kept with the reason
-          it was dismissed — so a thing that was decided never reads as a thing
-          that was lost.
+          Exposures the coordinator judged and put down, each kept with the reason it was dismissed
+          — so a thing that was decided never reads as a thing that was lost.
         </p>
       </header>
 
@@ -74,8 +68,8 @@ function EmptyDismissed() {
   return (
     <Sheet className="px-6 py-8">
       <p className="text-body text-ink">
-        Nothing has been dismissed. Every exposure the register has raised is
-        still standing on the sheet where you can see it.
+        Nothing has been dismissed. Every exposure the register has raised is still standing on the
+        sheet where you can see it.
       </p>
     </Sheet>
   );
@@ -104,8 +98,7 @@ function DismissedCard({ finding }: { finding: Finding }) {
 
         <dt className="eyebrow self-baseline">Was</dt>
         <dd className="text-ink-muted">
-          {severityLabel(finding.severity)} severity ·{" "}
-          {finding.evidenceCount}{" "}
+          {severityLabel(finding.severity)} severity · {finding.evidenceCount}{" "}
           {finding.evidenceCount === 1 ? "message" : "messages"} of evidence ·{" "}
           <span className="inline-flex items-center gap-1.5 align-middle">
             <Confidence value={finding.confidence} />

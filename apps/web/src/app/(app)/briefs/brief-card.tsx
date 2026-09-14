@@ -31,11 +31,9 @@ const SECTION_TITLES: Record<BriefSection, string> = {
 };
 
 const SECTION_LEDES: Record<BriefSection, string> = {
-  only_they_held:
-    "Capabilities that had rested in this one pair of hands until now.",
+  only_they_held: "Capabilities that had rested in this one pair of hands until now.",
   they_had_promised: "Commitments that were open at the point of the change.",
-  nobody_else_seen:
-    "Where the record shows no second person doing the thing — seen, not able.",
+  nobody_else_seen: "Where the record shows no second person doing the thing — seen, not able.",
 };
 
 export function BriefCard({ brief, current = false }: { brief: Brief; current?: boolean }) {
@@ -63,9 +61,7 @@ export function BriefCard({ brief, current = false }: { brief: Brief; current?: 
           </div>
           <p className="text-meta text-ink-muted mt-1">
             {brief.trigger}{" "}
-            <span className="text-ink-faint">
-              · {formatDateTime(brief.generatedAt)}
-            </span>
+            <span className="text-ink-faint">· {formatDateTime(brief.generatedAt)}</span>
           </p>
         </div>
         <CopyButton text={plainText} label={brief.title} />
@@ -73,7 +69,12 @@ export function BriefCard({ brief, current = false }: { brief: Brief; current?: 
 
       <div className="grid gap-5">
         {BRIEF_SECTIONS.map((section) => (
-          <Section key={section} section={section} lines={brief.sections[section]} briefId={brief.id} />
+          <Section
+            key={section}
+            section={section}
+            lines={brief.sections[section]}
+            briefId={brief.id}
+          />
         ))}
       </div>
 
@@ -126,11 +127,7 @@ function BriefLineRow({ line }: { line: BriefLine }) {
   return (
     <li className="chart-row grid grid-cols-[1fr_auto] items-baseline gap-3 px-3 py-2 first:border-t-0">
       <div className="text-dense">
-        {line.factId ? (
-          <Claim factId={line.factId}>{line.text}</Claim>
-        ) : (
-          <span>{line.text}</span>
-        )}
+        {line.factId ? <Claim factId={line.factId}>{line.text}</Claim> : <span>{line.text}</span>}
       </div>
       <AssignButton lineText={line.text} />
     </li>
@@ -179,9 +176,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
         onClick={copy}
         disabled={state === "copying"}
         aria-label={`Copy the brief "${label}" as plain text`}
-        style={
-          state === "error" ? { borderColor: "var(--color-status-held)" } : undefined
-        }
+        style={state === "error" ? { borderColor: "var(--color-status-held)" } : undefined}
       >
         {face}
       </button>
@@ -225,10 +220,7 @@ function AssignButton({ lineText }: { lineText: string }) {
 
   if (state === "filed") {
     return (
-      <span
-        className="code code-active shrink-0"
-        title="Filed as a record. No one was messaged."
-      >
+      <span className="code code-active shrink-0" title="Filed as a record. No one was messaged.">
         FILED
       </span>
     );

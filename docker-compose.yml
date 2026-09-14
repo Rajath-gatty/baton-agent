@@ -62,8 +62,15 @@ services:
       DATA_API_TOKEN: ${DATA_API_TOKEN:?set DATA_API_TOKEN}
       ORG_TIMEZONE: ${ORG_TIMEZONE:-Asia/Kolkata}
       PORT: 8081
-    # Coolify routes the data API to this port from the domain configured in its
-    # UI. /health is on the same port but must not be published publicly.
+    # Coolify assigns a domain per service from its UI. This service does not
+    # listen on 80, so the port must be included in the domain field or the proxy
+    # cannot find it. Do NOT use the SERVICE_FQDN_WORKER_8081 magic variable
+    # instead: the port-suffixed form has open bugs binding the wrong value.
+    #
+    # /health shares this port, so it IS reachable on the public domain. That is
+    # accepted rather than prevented: it returns a status and nothing else. What
+    # matters is the inverse — Coolify's health check must target /health and
+    # never a /data/* route, which answers 401 and reads as unhealthy.
     expose:
       - "8081"
 
@@ -72,6 +79,10 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
     restart: unless-stopped
+    # Deliberately NOT dependent on worker, even though the worker is what runs
+    # migrations on start. Coupling them would take the judge-facing UI down
+    # whenever the worker is unhealthy, which is the worse failure. The cost is a
+    # few seconds on a first deploy where web is up before the tables exist.
     depends_on:
       postgres:
         condition: service_healthy
@@ -79,6 +90,8 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       ADMIN_PASSCODE: ${ADMIN_PASSCODE:?set ADMIN_PASSCODE}
       SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET}
+    # This is the URL judges open. As with worker, the domain configured in
+    # Coolify's UI must carry the port, since Next listens on 3000 rather than 80.
     expose:
       - "3000"
 

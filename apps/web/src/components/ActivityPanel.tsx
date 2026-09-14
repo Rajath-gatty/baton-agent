@@ -56,8 +56,7 @@ export function ActivityPanel() {
     } catch (cause) {
       setPhase({
         kind: "error",
-        message:
-          cause instanceof Error ? cause.message : "The activity could not be loaded.",
+        message: cause instanceof Error ? cause.message : "The activity could not be loaded.",
       });
     }
   }, []);
@@ -103,12 +102,7 @@ export function ActivityPanel() {
           <p className="eyebrow" id="activity-panel-title">
             Activity — last run
           </p>
-          <button
-            type="button"
-            className="btn"
-            onClick={close}
-            aria-label="Close activity panel"
-          >
+          <button type="button" className="btn" onClick={close} aria-label="Close activity panel">
             Close
           </button>
         </header>
@@ -163,8 +157,8 @@ function ActivityBody({ run }: { run: Run }) {
           <Metric label="Candidates skipped" value={candidatesSkipped} />
         </dl>
         <p className="mt-1.5 text-meta text-[color:var(--color-ink-faint)]">
-          Candidates skipped is what the pass read and set aside — the restraint
-          the register runs on, counted here and nowhere else.
+          Candidates skipped is what the pass read and set aside — the restraint the register runs
+          on, counted here and nowhere else.
         </p>
       </section>
 
@@ -176,9 +170,7 @@ function ActivityBody({ run }: { run: Run }) {
 function Metric({ label, value }: { label: string; value: number }) {
   return (
     <div className="border-r border-[color:var(--color-rule)] px-3 py-2 last:border-r-0">
-      <dd className="board-type text-state leading-none text-[color:var(--color-ink)]">
-        {value}
-      </dd>
+      <dd className="board-type text-state leading-none text-[color:var(--color-ink)]">{value}</dd>
       <dt className="mt-1 text-label uppercase tracking-[0.1em] text-[color:var(--color-ink-faint)]">
         {label}
       </dt>
@@ -222,9 +214,7 @@ function TraceRow({ entry, step }: { entry: TraceEntry; step: number }) {
       ? `${entry.inputTokens ?? 0} in · ${entry.outputTokens ?? 0} out`
       : null;
   const duration = entry.durationMs !== undefined ? `${entry.durationMs} ms` : null;
-  const meta = [entry.model, tokens, duration].filter(
-    (part): part is string => Boolean(part),
-  );
+  const meta = [entry.model, tokens, duration].filter((part): part is string => Boolean(part));
 
   return (
     <li className="border-t border-[color:var(--color-rule)] py-2.5 first:border-t-0">
@@ -244,9 +234,7 @@ function TraceRow({ entry, step }: { entry: TraceEntry; step: number }) {
       ) : null}
 
       {entry.reasoning ? (
-        <p className="mt-1 pl-6 text-body text-[color:var(--color-ink-muted)]">
-          {entry.reasoning}
-        </p>
+        <p className="mt-1 pl-6 text-body text-[color:var(--color-ink-muted)]">{entry.reasoning}</p>
       ) : null}
 
       {entry.toolCalls && entry.toolCalls.length > 0 ? (
@@ -256,12 +244,8 @@ function TraceRow({ entry, step }: { entry: TraceEntry; step: number }) {
               key={`${call.name}-${callIndex}`}
               className="grid grid-cols-[auto_1fr_auto] items-baseline gap-x-2 text-meta"
             >
-              <span className="board-type text-[color:var(--color-ink)]">
-                {call.name}
-              </span>
-              <span className="text-[color:var(--color-ink-faint)]">
-                {call.argsSummary ?? "—"}
-              </span>
+              <span className="board-type text-[color:var(--color-ink)]">{call.name}</span>
+              <span className="text-[color:var(--color-ink-faint)]">{call.argsSummary ?? "—"}</span>
               <span
                 className={`code ${call.ok ? "code-active" : "code-held"}`}
                 aria-label={call.ok ? "Tool call succeeded" : "Tool call failed"}
@@ -302,12 +286,10 @@ function ActivitySkeleton() {
 function EmptyState() {
   return (
     <div className="py-8">
-      <p className="board-type text-lead text-[color:var(--color-ink)]">
-        No pass has run yet.
-      </p>
+      <p className="board-type text-lead text-[color:var(--color-ink)]">No pass has run yet.</p>
       <p className="mt-1 text-body text-[color:var(--color-ink-muted)]">
-        Once Baton has read the group&rsquo;s messages, this is where its account
-        of that pass will sit — what it read, what it kept, and what it set aside.
+        Once Baton has read the group&rsquo;s messages, this is where its account of that pass will
+        sit — what it read, what it kept, and what it set aside.
       </p>
     </div>
   );

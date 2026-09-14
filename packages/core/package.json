@@ -23,6 +23,10 @@
     "./prompts": {
       "types": "./dist/prompts/index.d.ts",
       "default": "./dist/prompts/index.js"
+    },
+    "./intake": {
+      "types": "./dist/intake/index.d.ts",
+      "default": "./dist/intake/index.js"
     }
   },
   "scripts": {

@@ -17,12 +17,18 @@ a test that runs, a screen that rendered. "The code exists" is `[~]`, not `[x]`.
 by an automated check rather than by inspection, the item says so, because an inspection result decays the
 moment someone edits the file and a test does not.
 
-**Status — 2026-09-13.** 147 done · 4 partial · 178 pending, of 329.
+**Status — 2026-09-13.** 157 done · 6 partial · 167 pending, of 330.
 
-`packages/core`, the database schema, seed data generation, and **the agent container with all six
-agents** are complete. `pnpm typecheck` passes on all five workspaces, `pnpm build` on all four,
-`pnpm lint` is clean, `pnpm format` conforms, and 184 tests pass (106 in core, 45 in the agent, 11 in
-worker, 22 in scripts).
+`packages/core`, the database schema, seed data generation, the agent container with all six agents, and
+**intake — the normaliser, the pre-filter and the backfill's first stage** are complete. `pnpm typecheck`
+passes on all five workspaces, `pnpm lint` is clean, `pnpm format` conforms, and 237 tests pass (106 in
+core, 75 in scripts, 45 in the agent, 11 in worker).
+
+**Seeded messages are now in Postgres.** `pnpm backfill -- --chat-id 0` loads the roster into `people` and
+`person_aliases`, then 1,753 messages of the two-month slice through the same normaliser and pre-filter
+that live traffic will use — 717 candidates, 1,036 discarded, every row carrying a verdict and a version.
+It holds the pipeline advisory lock throughout and is idempotent. The transcript is no longer an artifact
+on disk only.
 
 The agent container dispatches all five tasks against real agents. `ingest` and `assess` are SDK
 `Graph`s; `brief` and `respond` are single agents; all three producing tasks run their output through the
@@ -55,15 +61,21 @@ Seed generation runs in the two phases the design requires. `pnpm seed:plan` wri
 renders 4,421 messages across six months and its coverage report exits non-zero on any unmatched row; the
 two-month development slice keeps every row while compressing rather than dropping.
 
-Five things are explicitly **not** done and should not be inferred from the above. Every Phase 0 gate is
+Four things are explicitly **not** done and should not be inferred from the above. Every Phase 0 gate is
 unproven, which is the next work — and **no model call has been made**, so the six agents are wired,
-typechecked and unit-tested but have never seen a model. **No migration has been applied to a live
-database** — hardware virtualization is disabled on the development machine, so the Docker daemon will not
-start, `pnpm pg:up` cannot run, and the schema is proved by generated SQL rather than by Postgres accepting
-it. For the same reason no container image has been built. **No seeded message has entered Postgres**: the
-transcript is an artifact on disk, because seeded messages must enter through the same normaliser as live
-traffic and that normaliser does not exist yet. And the worker's four `/data/*` routes are still 501 stubs,
-so the agent's tool pull-path is wired and typed but not yet answerable.
+typechecked and unit-tested but have never seen a model. **Nothing has been curated**: intake is stage one
+of backfill, and stage two — candidates to `ingest` in batches of ten, then one `assess` pass — needs a
+working model call, so `facts`, `holdings`, `findings` and every derived table are still empty. **No
+container image has been built**, so the three Dockerfiles are unproven; on Windows the web build also
+fails creating symlinks for Next's standalone output, which is an OS permission limitation rather than a
+code defect, and Coolify builds that image on Linux. And the worker's four `/data/*` routes are still 501
+stubs, so the agent's tool pull-path is wired and typed but not yet answerable.
+
+**Resolved since the last revision.** Hardware virtualization was disabled on the development machine,
+which blocked Docker entirely. It now runs: `pnpm pg:up` brings up Postgres 17 on `127.0.0.1:5432` and
+`pnpm db:migrate` has applied the first migration, creating all 20 tables. The schema is therefore no
+longer proved only by generated SQL — Postgres has accepted it, and the five weight-bearing column
+invariants were re-checked against `information_schema` on the live database.
 
 ---
 
@@ -189,9 +201,12 @@ them causes specific, known failures.
       `holdings(asset_id, status)`, `findings(status, severity desc)`,
       `curator_cache(content_hash, prompt_version)` — all five asserted against the generated SQL
 - [~] Migrations run from `packages/core` on worker start — `runMigrations` is called first in
-      `apps/worker/src/main.ts` and `drizzle/0000_tranquil_wolfpack.sql` now exists, but **it has never
-      been applied to a live database**: the Docker daemon is still unavailable, so `pnpm pg:up` cannot
-      run. Unproven until the worker starts against real Postgres
+      `apps/worker/src/main.ts` and `drizzle/0000_tranquil_wolfpack.sql` **has now been applied to a live
+      database**: `pnpm pg:up` brings up Postgres 17 and `pnpm db:migrate` created all 20 tables. Re-running
+      it is a no-op, as the worker's start path requires. Also confirmed against live Postgres rather than
+      generated SQL: `questions.asked_at` is nullable **with no default**, `holdings.holder_person_id` and
+      `commitments.owner_person_id` are nullable, and `facts.match_key` and `findings.dedupe_key` are NOT
+      NULL. What remains is only that the **worker** has never been the thing that ran it on start
 
 **Structural guarantees — verify by inspection, not by intent:**
 
@@ -206,13 +221,19 @@ them causes specific, known failures.
 
 - [ ] Long-poll loop against `getUpdates` with committed offset
 - [ ] `allowed_updates` set to `["message", "edited_message", "chat_member", "my_chat_member"]`
-- [ ] Normaliser producing one internal message shape `[F1]`
-- [ ] Messages from an unrecognised chat id ignored
-- [ ] **Bot's own messages dropped at intake** `[F35]`
-- [ ] Forwarded messages attributed to the forwarder and flagged `[F4]`
+- [x] Normaliser producing one internal message shape `[F1]` — `@baton/core/intake`, not the worker,
+      because `scripts/backfill.ts` and the poll loop are different processes and the only way to
+      guarantee they share it is for there to be one copy neither owns. Seeded and Telegram inputs
+      converge on `NormalisedMessage`, whose field names mirror `messages` columns so there is no
+      second mapping step to drift
+- [x] Messages from an unrecognised chat id ignored — `normaliseTelegramMessage` returns null
+- [x] **Bot's own messages dropped at intake** `[F35]` — by sender id, in the same function
+- [x] Forwarded messages attributed to the forwarder and flagged `[F4]` — the forwarder put it in
+      front of the group, so the message is theirs; `forwarded_from` records where it came from
 - [ ] `edited_message` resets `curated_at` and `prefilter_verdict`, triggers re-curation `[F4]`
 - [ ] Re-curation after an edit supersedes prior facts rather than mutating them `[F4]`
-- [ ] Non-text media logged with `unprocessed` `[F5]`
+- [x] Non-text media logged with `unprocessed` `[F5]` — and kept as a *candidate*, so a voice note
+      that carried a fact is visible as a gap rather than silently absent
 - [ ] `chat_member` join/leave → lifecycle event recorded `[F3]`
 - [ ] `my_chat_member` → one-time introduction message, idempotent per chat `[F22]`
 - [ ] Question detection: mention of the bot, or reply to it — nothing else `[F20]`
@@ -227,16 +248,42 @@ them causes specific, known failures.
 
 ## Worker — pre-filter
 
-- [ ] Deterministic heuristics, recall-biased `[F6]`
-- [ ] Verdict and `prefilter_version` written for every message, kept and discarded alike
-- [ ] Re-evaluation path for previously discarded messages when the version changes
-- [ ] Skipped count exposed to `runs` `[F28]`
+- [x] Deterministic heuristics, recall-biased `[F6]` — `@baton/core/intake`. **Triggering** signals keep
+      a message on their own (asset nouns, holding, commitment, reported speech, termination, figures,
+      money, participation, lifecycle, contact details, forwards, credentials); **supporting** signals
+      (temporal reference, substantial length) only count alongside a trigger. Promoting those two to
+      triggers put the keep rate at 81% against a design target of roughly one in five, by keeping
+      stories about adopted dogs
+- [x] Verdict and `prefilter_version` written for every message, kept and discarded alike — verified in
+      Postgres: 717 candidate + 1,036 discarded, all at version 1, none null
+- [x] **Recall proved against the planted corpus, not asserted** — `scripts/test/prefilter-recall.test.ts`
+      runs every authored placement through the filter and fails if any placement carrying a non-noise
+      coverage row is discarded, or if any of the five planted cases loses every carrier. It runs on the
+      committed plan fixture rather than the derived transcript, so it works on a fresh clone. This is
+      the test that stops a token-saving tweak silently eating the stale-figure case that opens the video
+- [~] Re-evaluation path for previously discarded messages when the version changes — the backfill upsert
+      adopts `excluded.prefilter_verdict`, so bumping the version and re-running re-examines every stored
+      message. There is no automatic re-scan in the worker yet
+- [ ] Skipped count exposed to `runs` `[F28]` — counted and printed by the backfill, but no `runs` row is
+      written yet
+
+**Measured on the two-month slice.** 1,753 messages → 717 candidates (41%), against a design target
+nearer 20%. Two things bound the cost of that gap and both were measured rather than assumed: the
+candidates contain only **101 distinct `content_hash` values**, so the curator cache collapses 717
+messages into 101 model calls, and the keep rate was reduced from 81% before any planted material was
+lost. Tightening further is a precision exercise with a working harness in place; each attempt must keep
+the recall test green, and the one attempt that pruned generic asset nouns cost a planted durable fact
+for three points of keep rate, which is the wrong trade.
 
 ## Worker — persistence and derivation
 
 - [ ] Intake loop and processing loop are **separate** — curation never blocks polling
-- [ ] Strict `sent_at` ordering through the processing loop
-- [ ] Postgres advisory lock so only one pipeline task runs at a time
+- [~] Strict `sent_at` ordering through the processing loop — the backfill sorts strictly, breaking ties
+      on message id so the order is total and a re-run replays it identically. The live processing loop
+      does not exist yet
+- [x] Postgres advisory lock so only one pipeline task runs at a time — the backfill takes
+      `PIPELINE_LOCK_KEY` with `pg_try_advisory_lock`, not the blocking form: a backfill silently queued
+      behind a running worker is indistinguishable from one that has hung
 - [ ] Curator cache lookup happens **before** batches are formed; batches contain misses only
 - [ ] Fact merge on restatement via `match_key` — bumps `last_confirmed_at`, appends evidence `[F8]`
 - [ ] Fact supersession on contradiction — new row, `supersedes_fact_id` set `[F8]`
@@ -647,7 +694,8 @@ small mistakes hide, so these precede any deploy attempt.
       to administrator, and `allowed_updates` set — all three, or membership events are silently absent
 - [ ] Local stack runs with no AWS credentials at all
 - [ ] Local worker can be pointed at the **deployed** runtime by env change alone, for verifying G4
-- [ ] Two-month slice loaded locally; full six months only on the deployed environment
+- [x] Two-month slice loaded locally; full six months only on the deployed environment — 1,753 messages
+      in Postgres via `pnpm backfill -- --chat-id 0`, idempotent on re-run
 - [ ] `pg_dump` flows deployed → local only; never local → deployed, which would destroy the reset point
 - [ ] `reset-demo.ts` restores the golden dump
 - [ ] Golden `pg_dump` taken after the first good backfill

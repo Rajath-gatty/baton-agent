@@ -48,8 +48,7 @@ function factIdFromDedupeKey(dedupeKey: string): string | null {
 }
 
 /** The shared column template — one grid so every row's columns line up. */
-const GRID_TEMPLATE =
-  "minmax(0, 1fr) 9.5rem 3.25rem 4.5rem 11.5rem";
+const GRID_TEMPLATE = "minmax(0, 1fr) 9.5rem 3.25rem 4.5rem 11.5rem";
 
 type PendingAction = "resolve" | "backup" | "dismiss" | null;
 
@@ -97,11 +96,7 @@ export function FindingRow({ finding }: { finding: Finding }) {
             color: "var(--color-ink)",
           }}
         >
-          {factId ? (
-            <Claim factId={factId}>{finding.title}</Claim>
-          ) : (
-            finding.title
-          )}
+          {factId ? <Claim factId={factId}>{finding.title}</Claim> : finding.title}
         </h3>
         <p
           title={finding.whyItMatters}
@@ -127,11 +122,7 @@ export function FindingRow({ finding }: { finding: Finding }) {
         >
           {/* Evidence count is the clickable thread to provenance when a fact
               backs it; otherwise a plain count. */}
-          {factId ? (
-            <Claim factId={factId}>{evidenceLabel}</Claim>
-          ) : (
-            <span>{evidenceLabel}</span>
-          )}
+          {factId ? <Claim factId={factId}>{evidenceLabel}</Claim> : <span>{evidenceLabel}</span>}
           {/* Holder as a small attribute — never the subject. */}
           {finding.holderName ? (
             <>

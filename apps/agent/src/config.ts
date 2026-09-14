@@ -44,8 +44,16 @@ export function loadConfig(): AgentConfig {
   const defaultModel = optional("DEFAULT_MODEL", "deepseek-chat");
 
   return {
-    // AgentCore convention: the container listens on 8080.
-    port: Number.parseInt(optional("PORT", "8080"), 10),
+    /**
+     * `AGENT_PORT` first, then `PORT`, then the AgentCore convention of 8080.
+     *
+     * Both this container and the worker read `PORT`, which is correct in production
+     * where each is its own container and AgentCore sets it. Locally they share one
+     * `.env`, so a single `PORT` had this process bind the worker's 8081 — and since
+     * `AGENT_HTTP_URL` points at 8080, the worker then could not reach it. `AGENT_PORT`
+     * separates them without breaking the deployed case, where it is simply unset.
+     */
+    port: Number.parseInt(optional("AGENT_PORT", optional("PORT", "8080")), 10),
     model: {
       baseUrl: required("MODEL_BASE_URL"),
       apiKey: required("MODEL_API_KEY"),

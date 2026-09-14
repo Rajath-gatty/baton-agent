@@ -25,9 +25,7 @@ export const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 function secretKey(): Uint8Array {
   const secret = process.env.SESSION_SECRET;
   if (!secret || secret.length < 16) {
-    throw new Error(
-      "SESSION_SECRET is missing or too short (need at least 16 characters).",
-    );
+    throw new Error("SESSION_SECRET is missing or too short (need at least 16 characters).");
   }
   return new TextEncoder().encode(secret);
 }

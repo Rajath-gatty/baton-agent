@@ -49,18 +49,16 @@ async function listTables(url: string): Promise<string[]> {
 
 // Allow `pnpm db:migrate` to run this directly.
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  // Node 22 loads a dotenv file natively, so the CLI path needs no dependency and
-  // no wrapper. Only the CLI path does this: the worker's configuration is
-  // validated eagerly from its real environment, and silently reading a stray
-  // local `.env` inside a container would be a way to deploy the wrong database.
-  if (process.env["DATABASE_URL"] === undefined) {
-    try {
-      process.loadEnvFile(fileURLToPath(new URL("../../../../.env", import.meta.url)));
-    } catch {
-      // No .env at the repository root. DATABASE_URL must come from the
-      // environment, and the check below reports it if it did not.
-    }
-  }
+  // `loadDotEnv` rather than Node's built-in `process.loadEnvFile`: the built-in will not
+  // override a name already in the environment, and counts one set to the empty string as
+  // set — so a shell exporting empty placeholders silently beats a filled `.env`, and the
+  // resulting error names a variable you can see is populated.
+  //
+  // Only the CLI path does this. The worker's configuration is validated eagerly from its
+  // real environment, and silently reading a stray local `.env` inside a container would
+  // be a way to migrate the wrong database.
+  const { loadDotEnv } = await import("../env.js");
+  loadDotEnv(fileURLToPath(new URL("../../../../.env", import.meta.url)));
 
   const url = process.env["DATABASE_URL"];
   if (url === undefined || url === "") {
