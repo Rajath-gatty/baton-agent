@@ -16,10 +16,10 @@
  *      because the silence is a product promise, not an omission — filing a
  *      continuity record must never ping twenty people.
  *   3. The brief is offered to the person it is about [F24]. Copyable text is
- *      always available; a direct message is offered ONLY where that person has
- *      previously opened a chat with the bot, because Telegram forbids a bot
- *      writing first. Where they have not, the control is disabled with the
- *      reason beside it — a button that silently fails would be worse than none.
+ *      always available. Whether Baton could reach that person privately at all is
+ *      stated plainly — it can only where they have previously opened a chat with
+ *      the bot, because Telegram forbids a bot writing first — and the sending
+ *      itself belongs to the worker, which holds the token and paces the queue.
  *
  * Nothing here quotes a source message. Brief lines are Baton's own phrasing, not
  * verbatim volunteer text; the verbatim quote lives behind the `Claim`, in the
@@ -33,7 +33,7 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 import { BRIEF_SECTIONS, type BriefSection } from "@baton/core/constants";
 import type { Brief, BriefLine, BriefSubject } from "@/lib/types";
 import { formatDateTime } from "@/lib/format";
-import { fileBriefLine } from "@/app/actions";
+import { fileBriefLine, markBriefRead } from "@/app/actions";
 import { Claim } from "@/components/primitives";
 
 const SECTION_TITLES: Record<BriefSection, string> = {
@@ -85,9 +85,12 @@ export function BriefCard({ brief, current = false }: { brief: Brief; current?: 
             </span>
           </p>
         </div>
-        <CopyButton text={plainText} label={`Copy the brief "${brief.title}" as plain text`}>
-          Copy as text
-        </CopyButton>
+        <div className="flex shrink-0 items-center gap-2">
+          {brief.read ? null : <MarkReadButton briefId={brief.id} />}
+          <CopyButton text={plainText} label={`Copy the brief "${brief.title}" as plain text`}>
+            Copy as text
+          </CopyButton>
+        </div>
       </header>
 
       <div className="grid gap-5">
@@ -136,8 +139,8 @@ function Section({
         </p>
       ) : (
         <ul className="grid gap-1.5">
-          {lines.map((line, i) => (
-            <BriefLineRow key={`${section}-${i}`} line={line} briefId={briefId} />
+          {lines.map((line) => (
+            <BriefLineRow key={line.id} line={line} />
           ))}
         </ul>
       )}
@@ -151,13 +154,13 @@ function Section({
  * statement about the record's silence has nothing to trace to, and we do not
  * manufacture a link.
  */
-function BriefLineRow({ line, briefId }: { line: BriefLine; briefId: string }) {
+function BriefLineRow({ line }: { line: BriefLine }) {
   return (
     <li className="chart-row grid grid-cols-[1fr_auto] items-baseline gap-3 px-3 py-2 first:border-t-0">
       <div style={{ fontSize: "var(--text-dense)" }}>
         {line.factId ? <Claim factId={line.factId}>{line.text}</Claim> : <span>{line.text}</span>}
       </div>
-      <FileLineButton briefId={briefId} lineText={line.text} />
+      <FileLineButton line={line} />
     </li>
   );
 }
@@ -204,7 +207,7 @@ function OfferToSubject({ brief }: { brief: Brief }) {
             style={{ fontSize: "var(--text-meta)", color: "var(--color-ink-muted)" }}
           >
             {subject.canDirectMessage
-              ? `${subject.name} has written to Baton before, so it can send this directly. Nothing is posted to the group either way.`
+              ? `${subject.name} has written to Baton before, so Baton can reach them privately — the worker sends it, paced with everything else. Copy the text to pass it on yourself; nothing is posted to the group either way.`
               : `Baton cannot message ${subject.name} first — Telegram only allows it once that person has opened a chat with the bot. Copy the text and send it however you already reach them.`}
           </p>
         </div>
@@ -228,20 +231,22 @@ function OfferToSubject({ brief }: { brief: Brief }) {
 }
 
 /**
- * The direct-message control. Disabled — with the platform reason on the button
- * itself — whenever the subject has never opened a chat with the bot. The send
- * path is the worker's private-delivery route; this is its seam.
+ * The direct-message control.
+ *
+ * Two honest states and no third. Where Telegram has never given Baton a private
+ * chat for this person, a bot cannot write first, and the control says exactly
+ * that with the platform reason on the button — a button that silently failed
+ * would be worse than none.
+ *
+ * Where delivery *is* possible, the control still does not send from here, and
+ * that is architectural rather than unfinished: every outbound message goes
+ * through the worker's queue, which paces sends so the bot is not restricted, and
+ * the web app holds no bot token and no route to that queue. So it offers the
+ * text — the same fallback the worker itself returns when a private chat is
+ * missing — and says who will receive it. The copyable text beside it is the
+ * documented delivery path, not a degradation.
  */
 function DirectMessageButton({ subject }: { subject: BriefSubject }) {
-  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
-
-  const send = useCallback(() => {
-    setState("sending");
-    // SEAM: POST to the worker's private-delivery route, which reports `sent` or
-    // `undeliverable` and never throws. Local until that seam lands.
-    window.setTimeout(() => setState("sent"), 400);
-  }, []);
-
   if (!subject.canDirectMessage) {
     return (
       <button
@@ -255,27 +260,47 @@ function DirectMessageButton({ subject }: { subject: BriefSubject }) {
     );
   }
 
-  if (state === "sent") {
-    return (
-      <span
-        className="code code-active shrink-0"
-        title="Sent privately. Nothing was posted to the group."
-      >
-        SENT
-      </span>
-    );
-  }
+  return (
+    <button
+      type="button"
+      className="btn"
+      disabled
+      title={`Baton can reach ${subject.name} privately, but sending runs in the worker, which owns the bot token and paces every outbound message. Copy the text and it will reach them either way.`}
+    >
+      Reachable privately
+    </button>
+  );
+}
+
+// ── mark read ──────────────────────────────────────────────────────────────
+
+/**
+ * Clears the unread banner on the continuity stop.
+ *
+ * Present as an explicit control rather than firing on scroll: the banner is the
+ * one thing on the first viewport that says a handover is waiting, and marking it
+ * read because a page happened to render past it would lose that.
+ */
+function MarkReadButton({ briefId }: { briefId: string }) {
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <button
       type="button"
       className="btn"
-      onClick={send}
-      disabled={state === "sending"}
-      title={`Send this brief to ${subject.name} in a private chat. Nothing is posted to the group.`}
-      style={state === "error" ? { borderColor: "var(--color-status-held)" } : undefined}
+      disabled={pending}
+      aria-busy={pending}
+      title={error ?? "Mark this brief read. Nothing is sent to anyone."}
+      style={error === null ? undefined : { borderColor: "var(--color-status-held)" }}
+      onClick={() =>
+        startTransition(async () => {
+          const result = await markBriefRead(briefId);
+          setError(result.status === "ok" ? null : result.message);
+        })
+      }
     >
-      {state === "sending" ? "Sending…" : "Send privately"}
+      {pending ? "Marking…" : "Mark read"}
     </button>
   );
 }
@@ -344,20 +369,25 @@ function CopyButton({ text, label, children }: { text: string; label: string; ch
  * `app/actions.ts` rather than staying local, so the no-notification promise is
  * kept by the write path and not by a component that could later grow a send
  * call. States: idle, filing, filed (disabled), error.
+ *
+ * `filed` starts from the row's own `assigned_at`, so a line filed last week still
+ * reads as filed after a reload rather than offering the button again.
  */
 type FileState = "idle" | "filed" | "error";
 
-function FileLineButton({ briefId, lineText }: { briefId: string; lineText: string }) {
+function FileLineButton({ line }: { line: BriefLine }) {
   const [pending, startTransition] = useTransition();
-  const [state, setState] = useState<FileState>("idle");
+  const [state, setState] = useState<FileState>(line.filed ? "filed" : "idle");
+  const [message, setMessage] = useState<string | null>(null);
 
   const file = useCallback(() => {
     if (state === "filed" || pending) return;
     startTransition(async () => {
-      const result = await fileBriefLine(briefId, lineText);
+      const result = await fileBriefLine(line.id);
       setState(result.status === "ok" ? "filed" : "error");
+      setMessage(result.status === "ok" ? null : result.message);
     });
-  }, [briefId, lineText, pending, state, startTransition]);
+  }, [line.id, pending, state, startTransition]);
 
   if (state === "filed") {
     return (
@@ -375,8 +405,11 @@ function FileLineButton({ briefId, lineText }: { briefId: string; lineText: stri
       disabled={pending}
       aria-busy={pending}
       // The title says the quiet part in full; the label stays terse for the
-      // dense row.
-      title="File this line as a register record. No notification is sent to anyone."
+      // dense row. On a failure it carries the reason, which is the only place a
+      // dense row has for one.
+      title={
+        message ?? "File this line as a register record. No notification is sent to anyone."
+      }
       style={state === "error" ? { borderColor: "var(--color-status-held)" } : undefined}
     >
       {pending ? "Filing…" : state === "error" ? "Retry" : "File · no ping"}

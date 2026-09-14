@@ -1,11 +1,12 @@
 /**
  * Local view types for the Baton admin UI.
  *
- * These are *render* types, not the persisted shape — the database schema does
- * not exist yet, and when it lands these will be derived from Drizzle rows via
- * the seam in `data.ts`. They are built on the domain vocabulary from
- * `@baton/core` so a status or subtype string can never drift from the contract
- * the agent and worker share.
+ * These are *render* types, not the persisted shape. `lib/data.ts` maps Drizzle
+ * rows onto them, and the gap between the two is deliberate: the schema is
+ * normalised for the worker's writes, while these are flattened for one page's
+ * reading — a finding here carries its holder's name, not a `holder_person_id`.
+ * They are built on the domain vocabulary from `@baton/core` so a status or
+ * subtype string can never drift from the contract the agent and worker share.
  *
  * A note that governs every type below: no view type has a volunteer as its
  * subject. `holderName` and `personName` appear as *attributes of a capability
@@ -26,6 +27,7 @@ import type {
   PersonStatus,
   QuestionKind,
   QuestionStatus,
+  QuietDecisionScope,
   TraceEntry,
 } from "@baton/core";
 
@@ -55,6 +57,18 @@ export interface Finding {
   holderName: string | null;
   /** Stable key that collapses re-detections of the same exposure. */
   dedupeKey: string;
+  /**
+   * The first fact in this finding's evidence, so the row is one gesture from
+   * provenance like every other claim in the product.
+   *
+   * Read from `findings.evidence_fact_ids`, not parsed out of `dedupe_key`. The
+   * key is built from ids of whatever the finding's *subject* is — an asset, a
+   * capability, a commitment — and the fact panel takes a fact id, so deriving
+   * one from the other would open the wrong thing. Null when the finding rests on
+   * detection SQL alone, which is the ordinary case for `no_owner`: there is no
+   * claim behind "nobody is recorded as holding this".
+   */
+  factId: string | null;
   firstSeenAt: IsoTimestamp;
   lastSeenAt: IsoTimestamp;
   /** The assessor's own account of why it raised this. */
@@ -160,10 +174,22 @@ export interface Person {
 
 /** One line within a brief section. */
 export interface BriefLine {
+  /**
+   * The `brief_lines` row id. Present because filing a line is a write against
+   * that row: identifying it by its text would file the wrong one the moment two
+   * sections carried the same sentence.
+   */
+  id: string;
   /** The capability or commitment described, never a person as subject. */
   text: string;
   /** The fact this line traces back to, opened via the claim primitive. */
   factId: string | null;
+  /**
+   * Whether this line has already been filed as a record — `assigned_at` is set.
+   * Carried on the read so a filed line still reads as filed after a reload,
+   * rather than resetting to an unpressed button and inviting a second filing.
+   */
+  filed: boolean;
 }
 
 /**
@@ -228,8 +254,17 @@ export interface QuietDecision {
   summary: string;
   /** The reason, about the item or the organisation — never about a volunteer. */
   reasoning: string;
-  /** Whether the reasoning is scoped to one item or the whole register. */
-  scope: "item" | "org";
+  /**
+   * Which produce path Restraint was gating — `quiet_decisions.scope`.
+   *
+   * The three real scopes, not an item/org axis: Restraint gates findings, brief
+   * lines and answers, and which one it was is the thing worth showing. A strip
+   * that only ever said "this item" could not reveal that the veto had silently
+   * narrowed to findings, which is the failure the column exists to expose.
+   */
+  scope: QuietDecisionScope;
+  /** The run that recorded it, so restraint is auditable back to a pass. */
+  runId: string | null;
   decidedAt: IsoTimestamp;
 }
 
@@ -272,8 +307,25 @@ export interface Run {
   messagesConsidered: number;
   /** How many became durable facts. */
   factsRecorded: number;
+  /**
+   * How many candidates the pre-filter discarded — `runs.candidates_skipped`.
+   *
+   * A stored count, not the arithmetic the panel used to do on the two numbers
+   * above: "read 400, extracted 3" reads as a broken pipeline unless the 380 that
+   * were never candidates are stated, and the difference between those two figures
+   * is not that number.
+   */
+  candidatesSkipped: number;
   /** How many findings this run raised or updated. */
   findingsTouched: number;
+  /**
+   * The pass's outcome, in the three states the panel renders.
+   *
+   * Narrower than `runs.status`, which has four: `interrupted` — a run that
+   * stopped to ask the coordinator something, with its snapshot waiting — reads as
+   * `complete` here, because it is a successful outcome and the panel has no
+   * fourth frame for it. `failed` reads as `error`.
+   */
   status: "complete" | "running" | "error";
   trace: TraceEntry[];
 }

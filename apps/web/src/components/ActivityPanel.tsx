@@ -130,10 +130,11 @@ export function ActivityPanel() {
 // ── body ────────────────────────────────────────────────────────────────────
 
 function ActivityBody({ run }: { run: Run }) {
-  // Candidates skipped: everything the run considered that did not become a
-  // durable fact. Derived rather than stored, and labelled as such, so the
-  // number never implies a field the register does not keep.
-  const candidatesSkipped = Math.max(0, run.messagesConsidered - run.factsRecorded);
+  // The pre-filter's own count, read from `runs.candidates_skipped`. Not derived
+  // from the two numbers beside it: "read 400, extracted 3" reads as a broken
+  // pipeline until the 380 that were never candidates are stated, and the
+  // difference between those two figures is a different quantity.
+  const candidatesSkipped = run.candidatesSkipped;
   const running = run.status === "running";
   const errored = run.status === "error";
 
@@ -161,8 +162,8 @@ function ActivityBody({ run }: { run: Run }) {
           <Metric label="Candidates skipped" value={candidatesSkipped} />
         </dl>
         <p className="mt-1.5 text-meta text-[color:var(--color-ink-faint)]">
-          Candidates skipped is what the pass read and set aside — the restraint the register runs
-          on, counted here and nowhere else.
+          Candidates skipped is what the deterministic pre-filter discarded before any model was
+          called — the restraint the register runs on, counted here and nowhere else.
         </p>
       </section>
 

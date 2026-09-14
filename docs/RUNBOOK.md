@@ -493,10 +493,17 @@ Confirm the exact parameter names with
 | `MODEL_BASE_URL`, `MODEL_API_KEY` | The provider endpoint and key |
 | `DEFAULT_MODEL` | Fallback for any unset per-role model |
 | `CURATOR_MODEL`, `CARTOGRAPHER_MODEL`, `ASSESSOR_MODEL`, `RESTRAINT_MODEL`, `BRIEFER_MODEL`, `RESPONDENT_MODEL` | Optional; each falls back to `DEFAULT_MODEL` |
+| `MODEL_MAX_TOKENS` | Optional; defaults to 8192. Leave it unless a node starts failing validation on truncated output — see the note below |
 | `DATA_API_URL` | `https://<worker-domain>/data` — must be publicly resolvable **now** |
 | `DATA_API_TOKEN` | The same string the worker holds |
 
 Leave `AGENT_PORT` **unset**: AgentCore sets `PORT` itself, and the agent reads `AGENT_PORT` first.
+
+**On `MODEL_MAX_TOKENS`.** The agent bounds output at 8,192 tokens per call by default, and that default
+exists because of a real failure: with no ceiling set, the request declares the model's own maximum —
+131,072 on the configured model — and a provider that authorises credit against the *requested* ceiling
+rejects the call outright with `402 ... You requested up to 131072 tokens, but can only afford 33326`.
+That message reads as an account problem while being half a configuration one.
 
 Verify — a `/ping` that answers and a rejected-envelope round trip both prove more than a green status:
 

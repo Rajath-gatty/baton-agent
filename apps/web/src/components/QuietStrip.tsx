@@ -14,9 +14,11 @@
  * the same claim as no statement at all. The full reasoning is a scroll away in
  * `Set aside`, and every word of it is there.
  *
- * Reasoning is scoped `item` or `org` and, by contract, is never about a person: it
- * explains a decision about an item on the sheet or about how the register behaves,
- * not about a volunteer.
+ * Reasoning is item-level or organisation-level and, by contract, is never about a
+ * person: it explains a decision about an item on the sheet or about how the register
+ * behaves, not about a volunteer. The scope column says which produce path Restraint
+ * was gating — a finding, a brief line, or an answer to the group — which is what
+ * makes it visible that the veto still covers all three.
  *
  * The two links out live here rather than in a footer of their own, because a
  * separate footer row cost 30 pixels of the same budget to say two words.
@@ -29,8 +31,9 @@ import { formatRelativeAge } from "@/lib/format";
 import { Eyebrow } from "@/components/primitives";
 
 const SCOPE_LABEL: Record<QuietDecision["scope"], string> = {
-  item: "This item",
-  org: "The register",
+  finding: "A finding",
+  brief_line: "A brief line",
+  answer: "An answer",
 };
 
 /** The two anchors out of the strip, into the folded lists on the same page. */

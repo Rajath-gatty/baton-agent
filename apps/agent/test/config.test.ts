@@ -144,3 +144,28 @@ describe("per-agent models", () => {
     expect(config.model.curator).toBe("fallback");
   });
 });
+
+describe("the output ceiling", () => {
+  it("defaults to a bounded ceiling rather than the model's maximum", () => {
+    // The regression this exists for: unset means the model's own maximum, and a
+    // provider that authorises credit against the requested ceiling answers 402
+    // before generating a token. Absent configuration must not mean unbounded.
+    expect(loadConfig(MINIMUM).model.maxTokens).toBe(8192);
+  });
+
+  it("can be raised for a node that legitimately needs more room", () => {
+    expect(loadConfig({ ...MINIMUM, MODEL_MAX_TOKENS: "16384" }).model.maxTokens).toBe(16384);
+  });
+
+  it("treats an empty value as absent and keeps the default", () => {
+    expect(loadConfig({ ...MINIMUM, MODEL_MAX_TOKENS: "" }).model.maxTokens).toBe(8192);
+  });
+
+  it("refuses a non-numeric or non-positive ceiling", () => {
+    // `maxTokens: NaN` would reach the provider as an invalid request, and zero
+    // would produce an empty completion that fails schema validation on every
+    // attempt — a budget exhaustion that looks like a model too weak for the task.
+    expect(() => loadConfig({ ...MINIMUM, MODEL_MAX_TOKENS: "lots" })).toThrow(/MODEL_MAX_TOKENS/);
+    expect(() => loadConfig({ ...MINIMUM, MODEL_MAX_TOKENS: "0" })).toThrow(/MODEL_MAX_TOKENS/);
+  });
+});

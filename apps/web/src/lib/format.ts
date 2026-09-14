@@ -17,9 +17,17 @@ import type { AssetKind, FactStatus, FindingSeverity, FindingSubtype } from "@ba
  */
 export const ORG_TIMEZONE = "Asia/Kolkata";
 
-/** The reference "now" for relative ages. Kept fixed so synthetic fixture ages
- * read consistently; swap for `new Date()` once data is live. */
-const NOW_REFERENCE = new Date("2026-09-13T18:30:00+05:30");
+/**
+ * The reference "now" for relative ages.
+ *
+ * Live, because the register is. It was fixed while the UI read synthetic fixtures
+ * — a hard-coded date is what makes a fixture's ages read consistently — and a
+ * fixed reference against real rows would report a claim confirmed this morning as
+ * days old, which is precisely the reading the staleness warning depends on.
+ */
+function referenceNow(): Date {
+  return new Date();
+}
 
 const dateFormatter = new Intl.DateTimeFormat("en-IN", {
   timeZone: ORG_TIMEZONE,
@@ -60,7 +68,7 @@ const MS_PER_DAY = 86_400_000;
  * purpose — the coordinator needs the order of magnitude of an exposure's age,
  * not a precise duration.
  */
-export function formatRelativeAge(iso: string, now: Date = NOW_REFERENCE): string {
+export function formatRelativeAge(iso: string, now: Date = referenceNow()): string {
   const days = Math.floor((now.getTime() - new Date(iso).getTime()) / MS_PER_DAY);
   if (days <= 0) return "today";
   if (days === 1) return "1 day old";

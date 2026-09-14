@@ -19,9 +19,9 @@
  * run that recorded it, so restraint is auditable back to a pass of the agent
  * rather than being an unattributable act.
  *
- * A server component: it receives the reads and renders. The run attribution is
- * derived in the view because a `QuietDecision` carries no run id yet; when the
- * schema lands that becomes a real foreign key and the derivation is deleted.
+ * A server component: it receives the reads and renders. Each decision names the run
+ * that recorded it by `quiet_decisions.run_id`, so restraint is auditable back to a
+ * pass of the agent rather than being an unattributable act.
  */
 
 import type { Finding, QuietDecision, Run } from "@/lib/types";
@@ -279,47 +279,60 @@ function QuietCard({ decision, run }: { decision: QuietDecision; run: Run | null
   );
 }
 
+/**
+ * The produce path Restraint was gating, as a status code.
+ *
+ * Three scopes, because Restraint gates three things and the two nobody watches are
+ * the two a human reads aloud. A withheld brief line and a withheld answer are shown
+ * with as much weight as a withheld finding, which is the only way a reader could
+ * notice if either ever stopped appearing.
+ */
 function ScopeCode({ scope }: { scope: QuietDecision["scope"] }) {
-  if (scope === "org") {
+  if (scope === "brief_line") {
     return (
       <span
         className="code code-held shrink-0"
-        title="Organisation-level — a standing choice about how the register behaves"
-        aria-label="Scope: organisation-level"
+        title="A line Restraint kept out of a handover brief"
+        aria-label="Scope: a brief line"
       >
-        ORG
+        BRIEF
+      </span>
+    );
+  }
+  if (scope === "answer") {
+    return (
+      <span
+        className="code code-unverified shrink-0"
+        title="Something Restraint kept out of an answer to the group"
+        aria-label="Scope: an answer to the group"
+      >
+        ANSWER
       </span>
     );
   }
   return (
     <span
       className="code code-active shrink-0"
-      title="Item-level — a choice about one finding or asset"
-      aria-label="Scope: item-level"
+      title="An exposure Restraint judged not worth raising on the register"
+      aria-label="Scope: a finding"
     >
-      ITEM
+      FINDING
     </span>
   );
 }
 
-// ── run attribution (view-layer derivation) ──────────────────────────────────
+// ── run attribution ──────────────────────────────────────────────────────────
 
 /**
- * The run that recorded a decision, derived by time: the latest run whose start is
- * at or before the decision, or — when the decision predates every run on record —
- * the earliest run, so a decision is never left unattributed. Runs arrive
- * newest-first from the seam.
+ * The run that recorded a decision, by its real foreign key.
+ *
+ * `quiet_decisions.run_id` is nullable, and null is a legitimate state rather than
+ * missing data: a decision taken outside a pass — or one whose run has since been
+ * pruned — has no pass to name. It reads as such instead of being attributed to
+ * whichever run happens to be nearest in time, which is what this function did while
+ * the decisions were fixtures with no run on them.
  */
 function runForDecision(decision: QuietDecision, runs: Run[]): Run | null {
-  if (runs.length === 0) return null;
-  const decidedMs = new Date(decision.decidedAt).getTime();
-
-  for (const run of runs) {
-    if (new Date(run.startedAt).getTime() <= decidedMs) {
-      return run; // newest-first, so the first match is the latest qualifying run
-    }
-  }
-
-  // Predates every run: attribute to the earliest on record.
-  return runs[runs.length - 1] ?? null;
+  if (decision.runId === null) return null;
+  return runs.find((run) => run.id === decision.runId) ?? null;
 }

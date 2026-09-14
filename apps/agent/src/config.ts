@@ -41,6 +41,27 @@ import { z } from "zod";
 /** Used when no per-agent model and no `DEFAULT_MODEL` is set. */
 const FALLBACK_MODEL = "deepseek-chat";
 
+/**
+ * The output ceiling for every agent call, when `MODEL_MAX_TOKENS` is unset.
+ *
+ * **An unset ceiling is not "no limit" — it is the model's maximum**, and that has two
+ * costs. The visible one: a provider that authorises credit against the *requested*
+ * ceiling rather than the tokens actually produced rejects the request outright. This
+ * gate was found exactly that way, with OpenRouter answering `402 This request requires
+ * more credits, or fewer max_tokens. You requested up to 131072 tokens, but can only
+ * afford 33326` — a message that reads as an account problem while being, in part, a
+ * configuration one. The quieter cost: nothing bounds a runaway generation on the agent
+ * that runs on every candidate message.
+ *
+ * 8,192 is chosen against the largest real output rather than by feel. The Curator is
+ * the widest: ten messages per batch, each carrying a handful of flat records, which
+ * measures in the low thousands of tokens. Briefs and answers are prose a human reads
+ * and are shorter still. If a node ever needs more, it will stop with a truncated
+ * response and fail schema validation — which is loud, and is the retry loop's job to
+ * report — rather than silently producing half a register.
+ */
+const FALLBACK_MAX_TOKENS = 8192;
+
 /** The AgentCore convention. */
 const FALLBACK_PORT = 8080;
 
@@ -103,6 +124,16 @@ const configSchema = z.object({
   MODEL_BASE_URL: requiredString,
   MODEL_API_KEY: requiredString,
 
+  /**
+   * The output ceiling per call. Optional; see {@link FALLBACK_MAX_TOKENS} for why it
+   * has a default at all rather than being left to the provider.
+   *
+   * Reuses `optionalPort`'s validation deliberately — both are "a positive integer or
+   * absent", and 65,535 is above any plausible output ceiling, so the bound costs
+   * nothing and the `NaN` protection is the same protection.
+   */
+  MODEL_MAX_TOKENS: optionalPort,
+
   DEFAULT_MODEL: optionalString,
   CURATOR_MODEL: optionalString,
   CARTOGRAPHER_MODEL: optionalString,
@@ -121,6 +152,8 @@ export interface AgentConfig {
   model: {
     baseUrl: string;
     apiKey: string;
+    /** Output ceiling per call, applied to every role. */
+    maxTokens: number;
   } & Record<ModelRole, string>;
   dataApi: {
     url: string;
@@ -147,6 +180,7 @@ function resolve(env: z.infer<typeof configSchema>): AgentConfig {
     model: {
       baseUrl: env.MODEL_BASE_URL,
       apiKey: env.MODEL_API_KEY,
+      maxTokens: env.MODEL_MAX_TOKENS ?? FALLBACK_MAX_TOKENS,
       ...models,
     },
     dataApi: {

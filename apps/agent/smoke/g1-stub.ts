@@ -24,7 +24,7 @@
 
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
-import { Agent } from "@strands-agents/sdk";
+import { Agent, type TextBlock } from "@strands-agents/sdk";
 import { loadConfig } from "../src/config.js";
 import { buildModel, modelIdFor } from "../src/model/provider.js";
 
@@ -161,7 +161,7 @@ async function main(): Promise<void> {
     const elapsed = Date.now() - startedAt;
 
     const text = result.lastMessage.content
-      .filter((block): block is { type: "textBlock"; text: string } => block.type === "textBlock")
+      .filter((block): block is TextBlock => block.type === "textBlock")
       .map((block) => block.text)
       .join("")
       .trim();

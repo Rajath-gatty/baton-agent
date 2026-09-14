@@ -17,13 +17,14 @@ a test that runs, a screen that rendered. "The code exists" is `[~]`, not `[x]`.
 by an automated check rather than by inspection, the item says so, because an inspection result decays the
 moment someone edits the file and a test does not.
 
-**Status — 2026-09-14 (fourth revision, re-verified).** 298 done · 17 partial · 69 pending, of 384.
+**Status — 2026-09-14 (fourth revision, re-verified; `G1` ticked).** 299 done · 16 partial · 69 pending,
+of 384.
 
 Those four numbers are **counted from this file**, not maintained by hand:
 
 ```
-grep -c '^- \[x\]'  # done      298
-grep -c '^- \[~\]'  # partial    17
+grep -c '^- \[x\]'  # done      299
+grep -c '^- \[~\]'  # partial    16
 grep -c '^- \[ \]'  # pending    69
 ```
 
@@ -46,7 +47,8 @@ and `README.md` is still the one-line tagline; and none of the four Tier 2 items
 `5432:5432`. Nothing was ticked and nothing regressed. One marker moved, and only downward in strength:
 the root-build-context item under **The VM — Coolify** is now `[~]` rather than `[ ]`, because
 `docker-compose.yml` does declare `context: .` for both buildable services and the agent image was built
-that way — which is why the counts read 17 partial and 69 pending rather than 16 and 70.
+that way. (The counts at the top have since moved again for a separate reason — `G1` passed later the
+same day and went from `[~]` to `[x]`.)
 
 **Three things this pass learned that were not in the document.** `apps/web/.next/standalone` is absent
 after the most recent host build, which reached *"Collecting build traces"* and stopped there — so the
@@ -206,15 +208,15 @@ on AWS. **Nothing has been curated**: intake is stage one of backfill, and stage
 What is no longer on that list: **the worker's runtime loop is wired**, so the pipeline runs on a schedule
 rather than only under a test.
 
-**The gate blocker is now a credential, not untried code.** `G1` was run on 2026-09-14 and the result
-splits cleanly: Strands reaches a custom base URL correctly and surfaces the provider's error faithfully,
-so that half is proved and the LiteLLM-proxy contingency is closed. But `https://agentrouter.org/v1`
-rejects the configured `MODEL_API_KEY` with `unauthorized_client_error` on every route including
-`GET /models` — diagnosed with the SDK out of the path, ruling out streaming, headers, user-agent and
-host availability. Until a working key exists, or `MODEL_BASE_URL` is repointed at another
-OpenAI-compatible provider, **`G1`, `G2` and `G7` cannot progress and neither can backfill stage two**.
-That is a five-minute fix with the right credential and an indefinite block without one, which makes it
-the single most schedule-critical item in this document. Full detail under **Phase 0 — Gates**.
+**The gate blocker is cleared: `G1` passes.** It was run twice on 2026-09-14. The first run split
+cleanly — Strands reached a custom base URL correctly and surfaced the provider's error faithfully, so
+that half was proved and the LiteLLM-proxy contingency closed, but `https://agentrouter.org/v1` rejected
+the configured `MODEL_API_KEY` with `unauthorized_client_error` on every route including `GET /models`,
+diagnosed with the SDK out of the path. The credential was then replaced and the provider repointed at
+`https://openrouter.ai/api/v1`: the second run returned `"BATON G1 OK"` in 2,052 ms on
+`deepseek/deepseek-v4.1-flash`. **`G2` and `G7` are therefore unblocked, and so is backfill stage two** —
+what stands in their way now is unwritten code rather than an unusable key. Full detail under
+**Phase 0 — Gates**, including the one caveat the run surfaced: reported token usage was zero.
 
 What is no longer a caveat: the four `/data/*` routes are implemented and answer real queries, the
 migration path is proved against a live server, the normaliser exists and is shared by both the Telegram
@@ -253,34 +255,35 @@ reports real Curator latency. **Not yet decided.** See the pre-filter items unde
 Nothing below this section is worth starting until these pass. Each one, failing, invalidates work
 that follows it.
 
-- [~] **G1.** Strands TS agent with the OpenAI-compatible provider pointed at the model's base URL —
-      one agent, one call, locally. Records whether a custom base URL is accepted at all.
-      **Run 2026-09-14 via `pnpm --filter @baton/agent smoke:g1`. The SDK half passes; the provider
-      rejects the credential.**
+- [x] **G1.** Strands TS agent with the OpenAI-compatible provider pointed at the model's base URL —
+      one agent, one call, locally. **Passes, 2026-09-14, after the credential was replaced.**
 
-      What is proved: `OpenAIModel` with `clientConfig.baseURL` targets a non-OpenAI host correctly. The
-      request was constructed, sent to `https://agentrouter.org/v1`, answered in 5.8s, and the provider's
-      error was surfaced faithfully as a `ModelError`. `loadConfig` and `buildModel` were exercised on the
-      real shipping path rather than a bespoke construction, which is why the smoke script calls them.
-      **The design's LiteLLM-behind-a-proxy fallback is therefore not needed for base-URL support** — that
-      contingency can be considered closed.
+      Observed via `pnpm --filter @baton/agent smoke:g1`: base URL `https://openrouter.ai/api/v1`, model
+      `deepseek/deepseek-v4.1-flash`, `stopReason endTurn` in **2,052 ms**, and the reply was exactly
+      `"BATON G1 OK"`. `loadConfig` and `buildModel` were exercised on the real shipping path rather than a
+      bespoke construction, which is why the smoke script calls them — so this proves the wiring the
+      container actually uses.
 
-      What blocks it: every authenticated request returns HTTP 401
-      `{"type":"unauthorized_client_error","message":"UNAUTHENTICATED"}` — *"unauthorized client detected,
-      contact support"*. Diagnosed with Strands entirely out of the path, by raw `fetch`, and the cause is
-      **the credential, not the code**. Ruled out one at a time: it is not streaming (non-streaming fails
-      identically), not the SDK (raw `fetch` fails identically), not client fingerprinting (a browser
-      `User-Agent` changes nothing), not the header form (`x-api-key` fails identically), and not the host
-      being down (`GET /` returns 200 and serves the Agent Router app). `GET /models` fails too, so the
-      rejection happens in the auth layer before any model routing — which also means `DEFAULT_MODEL`
-      (`gpt-5.6-sol`) is unverified: nothing has yet reached the point of resolving a model name.
+      What this closes. `OpenAIModel` with `clientConfig.baseURL` reaches a non-OpenAI host, so **the
+      design's LiteLLM-behind-a-proxy fallback is not needed** and that contingency is closed. The provider
+      changed as part of the fix: the previous host, `https://agentrouter.org/v1`, returned HTTP 401
+      `{"type":"unauthorized_client_error","message":"UNAUTHENTICATED"}` on every authenticated request,
+      including `GET /models`, and that was diagnosed to the credential rather than the code — Strands out
+      of the path with raw `fetch` failed identically, as did `x-api-key`, a browser `User-Agent`, and
+      non-streaming. Recorded because it cost real time and because the same symptom on a new key means the
+      key, not this code.
 
-      To clear it: a working key for that service, or repoint `MODEL_BASE_URL` and `MODEL_API_KEY` at
-      another OpenAI-compatible provider. No code change is implied either way.
+      **One caveat found in passing: token usage came back `in 0 / out 0`.** `metrics.accumulatedUsage` is
+      what `model/trace.ts` writes into the trace and what the activity panel renders, so if this provider
+      never reports usage, every trace line will show zero tokens. Not a blocker for `G1`, which asks about
+      reachability, but it wants checking before `G7` measures Curator latency and cost.
+
 - [ ] **G2.** Structured output through that provider — one Zod schema, ten runs on a messy sample
       message. Record the conformance failure count; it sets how defensive the retry logic must be.
-      **Blocked behind G1's credential**, and the smoke script does not exist yet — `package.json`
-      declares `smoke:g2` pointing at `smoke/g2-structured.ts`, which is unwritten
+      **No longer blocked — `G1` passes.** What remains is the script itself: `package.json` declares
+      `smoke:g2` pointing at `smoke/g2-structured.ts`, which is unwritten. This is now the next thing to
+      build, because the retry loop in `apps/agent/src/model/structured.ts` is currently proved only
+      against hand-written fixtures
 - [ ] **G3.** Same agent deployed to AgentCore, reaching the model from inside the container. Confirms
       egress and the deploy path together.
 - [ ] **G4.** Worker on the VM invokes the deployed runtime over SigV4 and gets a result back.

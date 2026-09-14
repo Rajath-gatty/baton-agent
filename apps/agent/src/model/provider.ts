@@ -45,6 +45,12 @@ export function modelIdFor(role: AgentRole, config: AgentConfig): string {
  * the difference between two sweeps of identical input producing the same register
  * and producing two slightly different ones, which a coordinator reads as the tool
  * being unreliable.
+ *
+ * `maxTokens` is set for every role rather than left to the provider. Unset means the
+ * model's own maximum — 131,072 on the configured model — and a provider that
+ * authorises credit against the *requested* ceiling refuses the call before generating
+ * anything. See `FALLBACK_MAX_TOKENS` in `config.ts` for the failure that found this and
+ * how the number was chosen.
  */
 export function buildModel(role: AgentRole, config: AgentConfig): OpenAIModel {
   return new OpenAIModel({
@@ -53,5 +59,6 @@ export function buildModel(role: AgentRole, config: AgentConfig): OpenAIModel {
     clientConfig: { baseURL: config.model.baseUrl },
     modelId: modelIdFor(role, config),
     temperature: 0,
+    maxTokens: config.model.maxTokens,
   });
 }

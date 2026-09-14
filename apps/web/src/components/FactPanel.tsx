@@ -15,8 +15,8 @@
  *
  * Its reads cross to the server through `loadFactDetail` rather than importing the
  * data seam directly: this is a client component, and importing `lib/data.ts` here
- * would drag the whole read layer — a database client, once the schema lands —
- * into the browser bundle.
+ * would drag the whole read layer — including the Postgres client it holds — into
+ * the browser bundle. Its writes cross the same way, through `app/actions.ts`.
  *
  * Credential redaction [F30] therefore happens on the server too, and the raw text
  * is stripped before it crosses. Redacting in this component would have shipped the
@@ -33,7 +33,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Fact, Holding } from "@/lib/types";
 import { loadFactDetail, type FactDetail } from "@/app/panel-actions";
-import { withdrawProvenance } from "@/app/actions";
+import {
+  correctFact,
+  markFactVerified,
+  retireFact,
+  withdrawProvenance,
+  type RecordActionResult,
+} from "@/app/actions";
 import { factStatusLabel, formatDate, formatDateTime } from "@/lib/format";
 import { OPEN_FACT_EVENT, StatusCode, type OpenFactDetail } from "@/components/primitives";
 
@@ -53,11 +59,15 @@ export function FactPanel() {
   const [phase, setPhase] = useState<PanelPhase>({ kind: "idle" });
   const [pendingAction, setPendingAction] = useState<ActionKey | null>(null);
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
+  const [correcting, setCorrecting] = useState<string | null>(null);
+  const [failure, setFailure] = useState<string | null>(null);
 
   const loadFact = useCallback(async (factId: string) => {
     setPhase({ kind: "loading" });
     setPendingAction(null);
     setConfirmWithdraw(false);
+    setCorrecting(null);
+    setFailure(null);
     try {
       const detail = await loadFactDetail(factId);
       if (!detail) {
@@ -96,24 +106,62 @@ export function FactPanel() {
     setPhase({ kind: "idle" });
     setPendingAction(null);
     setConfirmWithdraw(false);
+    setCorrecting(null);
+    setFailure(null);
   }, []);
 
   /**
-   * Correct, retire and mark-verified are demonstration-only until their write
-   * seam lands: they resolve after a short delay so the loading and disabled
-   * states are exercised, then clear. Withdrawing provenance is different — it
-   * goes through the real server action, because that action's whole job is to
-   * stop showing a quote, which is a thing this panel can honour immediately.
+   * Runs one write and then re-reads the fact.
+   *
+   * Re-reading rather than patching the panel's own copy: retiring changes a
+   * status, correcting inserts a row and lengthens the supersession chain, and
+   * confirming stamps a verification — the panel showing its own guess at any of
+   * those would be a second source of truth about the register. The one exception
+   * is withdrawal, handled below, where the whole point is that the quote must
+   * stop being shown immediately and the server has already stopped sending it.
    */
+  const runWrite = useCallback(
+    (key: ActionKey, factId: string, write: () => Promise<RecordActionResult>) => {
+      setFailure(null);
+      setPendingAction(key);
+      void write()
+        .then(async (result) => {
+          if (result.status === "error") {
+            setFailure(result.message);
+            return;
+          }
+          await loadFact(factId);
+        })
+        .catch((cause: unknown) => {
+          setFailure(cause instanceof Error ? cause.message : "That change could not be saved.");
+        })
+        .finally(() => setPendingAction(null));
+    },
+    [loadFact],
+  );
+
   const runAction = useCallback(
     (key: ActionKey) => {
-      if (key !== "withdraw") {
-        setPendingAction(key);
-        window.setTimeout(() => setPendingAction(null), 900);
+      if (phase.kind !== "ready") return;
+      const fact = phase.detail.fact;
+
+      if (key === "correct") {
+        // Correcting needs the corrected text, so the button opens the editor
+        // rather than writing. Pressing it again closes it.
+        setFailure(null);
+        setCorrecting((current) => (current === null ? fact.statement : null));
         return;
       }
 
-      if (phase.kind !== "ready") return;
+      if (key === "retire") {
+        runWrite("retire", fact.id, () => retireFact(fact.id));
+        return;
+      }
+
+      if (key === "verify") {
+        runWrite("verify", fact.id, () => markFactVerified(fact.id));
+        return;
+      }
 
       // First press asks; second press acts. Withdrawing a quote is not
       // destructive — the fact stays — but it is the one action that changes what
@@ -123,33 +171,49 @@ export function FactPanel() {
         return;
       }
 
-      const factId = phase.detail.fact.id;
+      const factId = fact.id;
+      setFailure(null);
       setPendingAction("withdraw");
       void withdrawProvenance(factId)
         .then((result) => {
-          if (result.status === "ok") {
-            setPhase((current) =>
-              current.kind === "ready"
-                ? {
-                    ...current,
-                    detail: {
-                      ...current.detail,
-                      fact: { ...current.detail.fact, provenanceWithdrawn: true },
-                      // The quote stops travelling as well as stops showing.
-                      sourceText: null,
-                      credentialRedacted: false,
-                    },
-                  }
-                : current,
-            );
+          if (result.status === "error") {
+            setFailure(result.message);
+            return;
           }
+          setPhase((current) =>
+            current.kind === "ready"
+              ? {
+                  ...current,
+                  detail: {
+                    ...current.detail,
+                    fact: { ...current.detail.fact, provenanceWithdrawn: true },
+                    // The quote stops travelling as well as stops showing.
+                    sourceText: null,
+                    credentialRedacted: false,
+                  },
+                }
+              : current,
+          );
         })
         .finally(() => {
           setPendingAction(null);
           setConfirmWithdraw(false);
         });
     },
-    [confirmWithdraw, phase],
+    [confirmWithdraw, phase, runWrite],
+  );
+
+  const saveCorrection = useCallback(
+    (text: string) => {
+      if (phase.kind !== "ready") return;
+      const factId = phase.detail.fact.id;
+      runWrite("correct", factId, async () => {
+        const result = await correctFact(factId, text);
+        if (result.status === "ok") setCorrecting(null);
+        return result;
+      });
+    },
+    [phase, runWrite],
   );
 
   return (
@@ -177,23 +241,104 @@ export function FactPanel() {
           ) : phase.kind === "error" ? (
             <ErrorState message={phase.message} onRetry={close} />
           ) : (
-            <FactBody detail={phase.detail} />
+            <>
+              <FactBody detail={phase.detail} />
+              {correcting === null ? null : (
+                <CorrectionEditor
+                  initial={correcting}
+                  pending={pendingAction === "correct"}
+                  onCancel={() => setCorrecting(null)}
+                  onSave={saveCorrection}
+                />
+              )}
+            </>
           )}
         </div>
 
-        <footer className="flex items-center justify-between gap-3 border-t border-[color:var(--color-rule)] px-5 py-3">
-          <WithdrawHint phase={phase} confirming={confirmWithdraw} />
-          <div className="flex items-center gap-2">
-            <FactActions
-              phase={phase}
-              pendingAction={pendingAction}
-              confirming={confirmWithdraw}
-              onAction={runAction}
-            />
+        <footer className="flex flex-col gap-1 border-t border-[color:var(--color-rule)] px-5 py-3">
+          {failure === null ? null : (
+            <p role="alert" className="text-label text-[color:var(--color-status-held)]">
+              {failure}
+            </p>
+          )}
+          <div className="flex items-center justify-between gap-3">
+            <WithdrawHint phase={phase} confirming={confirmWithdraw} />
+            <div className="flex items-center gap-2">
+              <FactActions
+                phase={phase}
+                pendingAction={pendingAction}
+                confirming={confirmWithdraw}
+                correcting={correcting !== null}
+                onAction={runAction}
+              />
+            </div>
           </div>
         </footer>
       </div>
     </dialog>
+  );
+}
+
+// ── correction editor ───────────────────────────────────────────────────────
+
+/**
+ * The inline editor behind Correct.
+ *
+ * A correction is not an edit: saving writes a new fact that supersedes this one,
+ * so the register keeps what it used to say and the chain below shows the
+ * correction as history. The note says so, because a coordinator who thought they
+ * were overwriting the record would be surprised to find the old wording still
+ * quoted in the panel.
+ */
+function CorrectionEditor({
+  initial,
+  pending,
+  onCancel,
+  onSave,
+}: {
+  initial: string;
+  pending: boolean;
+  onCancel: () => void;
+  onSave: (text: string) => void;
+}) {
+  const [text, setText] = useState(initial);
+  const unchanged = text.trim() === initial.trim() || text.trim() === "";
+
+  return (
+    <section
+      aria-labelledby="fact-correct-heading"
+      className="mt-5 border-t border-[color:var(--color-rule)] pt-4"
+    >
+      <p className="eyebrow" id="fact-correct-heading">
+        Correct this claim
+      </p>
+      <p className="mt-1 text-label text-[color:var(--color-ink-faint)]">
+        Saving records a new claim that supersedes this one. The wording below stays on the record
+        as history — nothing is overwritten, and the source message is untouched.
+      </p>
+      <textarea
+        className="mt-2 w-full border border-[color:var(--color-rule-strong)] bg-transparent p-2 text-body text-[color:var(--color-ink)]"
+        rows={3}
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        aria-label="The corrected claim"
+        disabled={pending}
+      />
+      <div className="mt-2 flex items-center justify-end gap-2">
+        <button type="button" className="btn" onClick={onCancel} disabled={pending}>
+          Cancel
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => onSave(text)}
+          disabled={pending || unchanged}
+          aria-busy={pending}
+        >
+          {pending ? "Saving…" : "Save correction"}
+        </button>
+      </div>
+    </section>
   );
 }
 
@@ -401,19 +546,30 @@ function FactActions({
   phase,
   pendingAction,
   confirming,
+  correcting,
   onAction,
 }: {
   phase: PanelPhase;
   pendingAction: ActionKey | null;
   confirming: boolean;
+  correcting: boolean;
   onAction: (key: ActionKey) => void;
 }) {
   const ready = phase.kind === "ready";
   const busy = pendingAction !== null;
   const fact = phase.kind === "ready" ? phase.detail.fact : null;
-  // "Mark verified" only makes sense for a fact awaiting confirmation.
-  const verifiable =
-    fact !== null && (fact.status === "unverified" || fact.status === "pending_approval");
+  /**
+   * "Mark verified" is for a claim awaiting confirmation, and *only* an unverified
+   * one. A claim held at `pending_approval` belongs to the approval gate: it is
+   * resolved by the coordinator answering in Telegram, which is what lets the
+   * worker resume the agent from its snapshot and check the answerer is permitted.
+   * Adopting it here would leave that snapshot open for good.
+   */
+  const verifiable = fact !== null && fact.status === "unverified";
+  const awaitingApproval = fact !== null && fact.status === "pending_approval";
+  // A superseded or retired claim is history: correcting or retiring it again
+  // would rewrite a record rather than add to it.
+  const standing = fact !== null && (fact.status === "active" || fact.status === "unverified");
   // Nothing to withdraw once the quote is already withdrawn.
   const withdrawable = fact !== null && !fact.provenanceWithdrawn;
 
@@ -422,8 +578,14 @@ function FactActions({
       {ACTIONS.map((action) => {
         const isVerify = action.key === "verify";
         const isWithdraw = action.key === "withdraw";
+        const isCorrect = action.key === "correct";
+        const isRetire = action.key === "retire";
         const disabled =
-          !ready || busy || (isVerify && !verifiable) || (isWithdraw && !withdrawable);
+          !ready ||
+          busy ||
+          (isVerify && !verifiable) ||
+          (isWithdraw && !withdrawable) ||
+          ((isCorrect || isRetire) && !standing);
         const pending = pendingAction === action.key;
         const label = isWithdraw && confirming ? "Confirm withdraw" : action.label;
         return (
@@ -434,16 +596,23 @@ function FactActions({
             onClick={() => onAction(action.key)}
             disabled={disabled}
             aria-busy={pending}
+            aria-expanded={isCorrect ? correcting : undefined}
             style={
               isWithdraw && confirming ? { borderColor: "var(--color-status-held)" } : undefined
             }
             title={
               isWithdraw
                 ? "Stop showing the quoted message. The fact, its status and its trail all stay."
-                : undefined
+                : isVerify && awaitingApproval
+                  ? "This claim is held for approval. Approvals are answered in the group chat, so the agent can be resumed with the answer."
+                  : isCorrect
+                    ? "Record a corrected claim. The current wording stays on the record, superseded."
+                    : isRetire
+                      ? "The arrangement has ended and nothing replaces it. The claim stays on the record, retired."
+                      : undefined
             }
           >
-            {pending ? "Working…" : label}
+            {pending ? "Working…" : isCorrect && correcting ? "Close editor" : label}
           </button>
         );
       })}

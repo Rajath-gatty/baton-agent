@@ -1,6 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "//": "Typechecks the tests, which the build config deliberately excludes: tests must not land in dist. Without this, test files are only ever transpiled by vitest, which strips types without checking them — so a test could construct a value the production code would reject and still pass.",
+  "//smoke": "The Phase 0 smoke scripts are checked here for the same reason and one more: they are run by hand, months apart, at exactly the moment a gate is being proved. A script that no longer compiles against the code it exercises would fail then, and the failure would read as the gate failing. tsx strips their types without checking them, so nothing else would catch it.",
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": false,
@@ -10,5 +11,5 @@
     "incremental": false,
     "rootDir": "."
   },
-  "include": ["src/**/*.ts", "test/**/*.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "smoke/**/*.ts"]
 }

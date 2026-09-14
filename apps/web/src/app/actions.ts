@@ -1,44 +1,73 @@
 "use server";
 
 /**
- * The register's write seam.
+ * The register's write seam — the server actions the UI calls.
  *
- * These are the only ways a coordinator changes what the register holds: resolve
- * a finding (the exposure has been addressed), record that a backup already
- * exists (so the finding was never a real single-coverage), dismiss it (not worth
- * carrying), withdraw a claim's provenance (the quoted message is gone from
- * Telegram and Baton is not told), or file a brief line as a record. They are the
- * counterpart to the read seam in `lib/data.ts` — every write goes through here
- * so the persistence swap is contained to one file, exactly as every read goes
- * through one file.
+ * Thin on purpose. Each function is a mutation from `lib/mutations.ts`, a
+ * `revalidatePath("/")` so the one page re-reads, and the shape the calling
+ * component renders. The decision-carrying code and every SQL statement live in
+ * that module instead, for one reason: a `"use server"` module cannot be imported
+ * outside Next, so writes kept in here could never be tested against a real
+ * database. `test/register.test.ts` drives the mutations directly.
  *
- * UNRESOLVED ARCHITECTURAL DECISION — do not silently pick one:
- * Whether the web app writes to Postgres directly (via `@baton/core/db`) or
- * POSTs to the worker (so the agent's own invariants — dedupe keys, the
- * detection-visibility rules, the audit trail on the run — are enforced in one
- * place) is not yet decided. Writing directly is simpler; going through the
- * worker keeps the register's rules in a single owner and avoids two writers
- * racing on the same row. These stubs are that seam: when the decision lands,
- * only the bodies below change, and they revalidate the continuity page so the
- * register re-reads. Signatures and the revalidate call stay put.
+ * **The architectural decision these stubs were waiting on has been taken: the
+ * admin UI writes to Postgres directly.** The reasoning is recorded in
+ * `lib/mutations.ts`, where the writes are — briefly, adding write routes to the
+ * worker's data API would hand a write path to the bearer token the *agent* holds,
+ * and there is no invariant here for the worker to protect, because every column
+ * these actions touch is one only a coordinator writes.
+ *
+ * The one write that does not live here is sending. Nothing in the web app can put
+ * a message on Telegram: the outbound queue and the bot token are the worker's. For
+ * filing a brief line that is not a limitation but the promise itself — a
+ * continuity record must never ping twenty people.
  */
 
 import { revalidatePath } from "next/cache";
 import type { FindingStatus } from "@baton/core";
+import * as db from "@/lib/mutations";
 
 /** What a write attempt reports back, so a caller can render its own error. */
 export type FindingActionResult =
   | { status: "ok"; findingId: string; to: FindingStatus }
   | { status: "error"; findingId: string; message: string };
 
+/** What a fact-level or brief-level write reports back. */
+export type RecordActionResult = { status: "ok" } | { status: "error"; message: string };
+
+/**
+ * Re-read the one page.
+ *
+ * Every action calls this, including the failing ones: a write that failed because
+ * the row had already moved on is exactly the case where the coordinator is looking
+ * at a stale register and should be shown the current one.
+ */
+function reread(): void {
+  revalidatePath("/");
+}
+
+function finding(
+  result: db.WriteResult,
+  findingId: string,
+  to: FindingStatus,
+): FindingActionResult {
+  reread();
+  return result.ok
+    ? { status: "ok", findingId, to }
+    : { status: "error", findingId, message: result.message };
+}
+
+function record(result: db.WriteResult): RecordActionResult {
+  reread();
+  return result.ok ? { status: "ok" } : { status: "error", message: result.message };
+}
+
 /**
  * Resolve a finding: the exposure it named has been addressed. Moves the
  * finding to `resolved` and drops it out of the open register.
  */
 export async function resolveFinding(findingId: string): Promise<FindingActionResult> {
-  // SEAM: persist status → "resolved" (Postgres write or worker POST, undecided).
-  revalidatePath("/");
-  return { status: "ok", findingId, to: "resolved" };
+  return finding(await db.resolveFinding(findingId), findingId, "resolved");
 }
 
 /**
@@ -47,24 +76,18 @@ export async function resolveFinding(findingId: string): Promise<FindingActionRe
  * single-covered, so the finding closes as `resolved` with that reason.
  */
 export async function markHasBackup(findingId: string): Promise<FindingActionResult> {
-  // SEAM: persist status → "resolved", reason "we already have a backup".
-  revalidatePath("/");
-  return { status: "ok", findingId, to: "resolved" };
+  return finding(await db.markHasBackup(findingId), findingId, "resolved");
 }
 
 /**
  * Dismiss a finding: the coordinator judges it not worth carrying. Moves it to
  * `dismissed`, where it stays visible in the set-aside list at the foot of the
- * page rather than deleted, so a dismissal can always be traced and reversed.
+ * page rather than deleted, so a dismissal can always be traced — and where the
+ * worker's sweep will not reopen it, because dismissal is permanent.
  */
 export async function dismissFinding(findingId: string): Promise<FindingActionResult> {
-  // SEAM: persist status → "dismissed" with a dismissal reason.
-  revalidatePath("/");
-  return { status: "ok", findingId, to: "dismissed" };
+  return finding(await db.dismissFinding(findingId), findingId, "dismissed");
 }
-
-/** What a fact-level or brief-level write reports back. */
-export type RecordActionResult = { status: "ok" } | { status: "error"; message: string };
 
 /**
  * Withdraw a claim's provenance [F4].
@@ -77,28 +100,44 @@ export type RecordActionResult = { status: "ok" } | { status: "error"; message: 
  * larger lie — the register would then claim it never knew something it did.
  */
 export async function withdrawProvenance(factId: string): Promise<RecordActionResult> {
-  // SEAM: persist facts.provenance_withdrawn = true for `factId`. Nothing else
-  // changes; in particular the fact is neither retired nor deleted.
-  void factId;
-  revalidatePath("/");
-  return { status: "ok" };
+  return record(await db.withdrawProvenance(factId));
+}
+
+/** Retire a claim: the arrangement it describes has ended, and nothing replaces it. */
+export async function retireFact(factId: string): Promise<RecordActionResult> {
+  return record(await db.retireFact(factId));
+}
+
+/**
+ * Confirm an unverified claim. A human agreeing is the strongest provenance the
+ * register has, and it is the moment the claim becomes visible to detection.
+ */
+export async function markFactVerified(factId: string): Promise<RecordActionResult> {
+  return record(await db.markFactVerified(factId));
+}
+
+/**
+ * Correct a claim's wording. Writes a new fact that supersedes the old one rather
+ * than editing it, so the register keeps what it used to say.
+ */
+export async function correctFact(
+  factId: string,
+  correctedClaim: string,
+): Promise<RecordActionResult> {
+  return record(await db.correctFact(factId, correctedClaim));
 }
 
 /**
  * File a brief line as a record.
  *
  * The silence is the feature: filing a continuity record must never ping twenty
- * people, so this writes and sends nothing. It lives in this file rather than in
- * the client island so that the promise is kept by the server seam and not by a
- * component that could later grow a notification call.
+ * people, so this writes and sends nothing.
  */
-export async function fileBriefLine(
-  briefId: string,
-  lineText: string,
-): Promise<RecordActionResult> {
-  // SEAM: persist the assignment against `brief_lines`. NO outbound message.
-  void briefId;
-  void lineText;
-  revalidatePath("/");
-  return { status: "ok" };
+export async function fileBriefLine(lineId: string): Promise<RecordActionResult> {
+  return record(await db.fileBriefLine(lineId));
+}
+
+/** Mark a brief read, which clears the unread banner on the continuity stop. */
+export async function markBriefRead(briefId: string): Promise<RecordActionResult> {
+  return record(await db.markBriefRead(briefId));
 }

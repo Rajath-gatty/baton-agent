@@ -56,11 +56,11 @@
     "db:migrate": "tsx src/db/migrate.ts"
   },
   "dependencies": {
-    "drizzle-orm": "0.44.6",
+    "drizzle-orm": "0.45.2",
     "postgres": "3.4.7",
     "zod": "3.25.76"
   },
   "devDependencies": {
-    "drizzle-kit": "0.31.5"
+    "drizzle-kit": "0.31.10"
   }
 }

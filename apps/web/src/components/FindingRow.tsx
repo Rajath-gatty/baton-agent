@@ -36,20 +36,14 @@ import {
 } from "@/app/actions";
 
 /**
- * A finding's title opens the fact behind it — but only when there is a fact to
- * open. Findings key off assets (`sole_holder:a-insta-login`) or facts
- * (`loose_end:f-80g`); the fact panel takes a fact id, so the title is a `Claim`
- * only when the dedupe key names an `f-`-prefixed fact, and plain text
- * otherwise. Guessing an asset id into the fact panel would open the wrong
- * thing, which is worse than not opening at all.
+ * The shared column template — one grid so every row's columns line up.
+ *
+ * The title opens the fact behind the finding when there is one. That id comes
+ * from `findings.evidence_fact_ids` on the read, not from parsing `dedupe_key`:
+ * the key is built from the id of whatever the finding's *subject* is — an asset,
+ * a capability, a commitment — and feeding one of those to the fact panel would
+ * open the wrong thing, which is worse than not opening at all.
  */
-function factIdFromDedupeKey(dedupeKey: string): string | null {
-  const target = dedupeKey.split(":")[1];
-  if (target && target.startsWith("f-")) return target;
-  return null;
-}
-
-/** The shared column template — one grid so every row's columns line up. */
 const GRID_TEMPLATE = "minmax(0, 1fr) 9.5rem 3.25rem 4.5rem 11.5rem";
 
 type PendingAction = "resolve" | "backup" | "dismiss" | null;
@@ -59,7 +53,7 @@ export function FindingRow({ finding }: { finding: Finding }) {
   const [active, setActive] = useState<PendingAction>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const factId = factIdFromDedupeKey(finding.dedupeKey);
+  const factId = finding.factId;
   const busy = pending;
 
   function run(which: Exclude<PendingAction, null>, fn: () => Promise<FindingActionResult>) {
