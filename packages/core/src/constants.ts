@@ -293,3 +293,16 @@ export type RespondentOutcome = (typeof RESPONDENT_OUTCOMES)[number];
  * threshold has to sit below that and above the ordinary rhythm of the group.
  */
 export const STALE_FACT_THRESHOLD_DAYS = 90;
+
+/**
+ * How many candidate messages travel in one `ingest` request.
+ *
+ * Ten amortises the Curator's system prompt across ten classifications without
+ * making a single failed call expensive to retry. The number is a contract rather
+ * than a tuning knob: the Curator prompt forbids cross-message inference precisely
+ * so that batching is invisible to the output, which is what makes the per-message
+ * `content_hash` cache sound. Batches are formed from cache misses only, so their
+ * composition changes on every run — and a classification that shifted when its
+ * neighbours changed would make the cache silently wrong.
+ */
+export const INGEST_BATCH_SIZE = 10;

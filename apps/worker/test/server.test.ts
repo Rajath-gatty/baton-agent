@@ -1,6 +1,7 @@
 import type { AddressInfo } from "node:net";
 import type { Server } from "node:http";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { setupTestDatabase, type TestDatabase } from "@baton/core/db/testing";
 import { createServer } from "../src/api/server.js";
 import { loadConfig } from "../src/config.js";
 
@@ -59,10 +60,17 @@ describe("worker http surface", () => {
   let databaseReachable = true;
   let server: Server;
   let origin: string;
+  let harness: TestDatabase;
 
   beforeAll(async () => {
+    // A real database: the data routes run real SQL now, and an empty schema is a
+    // perfectly good fixture for auth and health assertions.
+    harness = await setupTestDatabase();
+    await harness.truncate();
+
     const app = createServer({
       config,
+      db: harness.db,
       isDatabaseReachable: () => Promise.resolve(databaseReachable),
     });
     await new Promise<void>((resolve) => {
@@ -74,6 +82,7 @@ describe("worker http surface", () => {
 
   afterAll(async () => {
     await new Promise<void>((resolve) => server.close(() => resolve()));
+    await harness.close();
   });
 
   describe("GET /health", () => {
@@ -109,12 +118,13 @@ describe("worker http surface", () => {
     });
 
     it("admits a request with the correct token", async () => {
-      const response = await fetch(`${origin}/data/facts`, {
+      const response = await fetch(`${origin}/data/facts?q=clinic`, {
         headers: { authorization: `Bearer ${config.DATA_API_TOKEN}` },
       });
-      // 501 rather than 200: the route is past auth but not yet implemented,
-      // which is exactly what this asserts.
-      expect(response.status).toBe(501);
+      // 200 with an empty register, rather than the 501 this asserted while the
+      // routes were stubs.
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual({ facts: [] });
     });
 
     it("guards every data route, not just the first", async () => {

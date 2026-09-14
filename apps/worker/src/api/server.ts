@@ -16,11 +16,20 @@
 
 import express, { type Express, type RequestHandler } from "express";
 import type { WorkerConfig } from "../config.js";
+import type { Executor } from "../store/types.js";
+import { getEvidence, getHoldings, getPerson, searchFacts } from "../store/data-api.js";
 
 export interface ServerDeps {
   config: WorkerConfig;
+  /** Reads only. Nothing reachable from this server writes. */
+  db: Executor;
   /** Cheap liveness probe against Postgres. */
   isDatabaseReachable: () => Promise<boolean>;
+}
+
+/** Reads a required single-value query parameter, or null when it is absent or blank. */
+function queryParam(value: unknown): string | null {
+  return typeof value === "string" && value.trim() !== "" ? value : null;
 }
 
 function bearerAuth(token: string): RequestHandler {
@@ -34,7 +43,7 @@ function bearerAuth(token: string): RequestHandler {
   };
 }
 
-export function createServer({ config, isDatabaseReachable }: ServerDeps): Express {
+export function createServer({ config, db, isDatabaseReachable }: ServerDeps): Express {
   const app = express();
   app.use(express.json({ limit: "1mb" }));
 
@@ -49,13 +58,58 @@ export function createServer({ config, isDatabaseReachable }: ServerDeps): Expre
   data.use(bearerAuth(config.DATA_API_TOKEN));
 
   // All read-only. The agent never writes; it returns proposed changes and the
-  // worker decides. Implemented alongside the Strands tools that call them.
-  data.get("/facts", (_req, res) => res.status(501).json({ error: "Not implemented" }));
-  data.get("/facts/:id/evidence", (_req, res) =>
-    res.status(501).json({ error: "Not implemented" }),
-  );
-  data.get("/holdings", (_req, res) => res.status(501).json({ error: "Not implemented" }));
-  data.get("/people", (_req, res) => res.status(501).json({ error: "Not implemented" }));
+  // worker decides. The paths and parameter names are fixed by the agent's client in
+  // `apps/agent/src/tools/data-api.ts` — a rename here silently breaks a tool, since
+  // the client reports a failed lookup as data rather than throwing.
+  //
+  // A missing parameter is a 400 rather than an empty result: the agent's tool
+  // callbacks already reject blank input, so a blank arriving here means something is
+  // wrong that should be visible in the trace instead of looking like "nothing found".
+
+  /** `searchFacts(query)` */
+  data.get("/facts", async (req, res) => {
+    const q = queryParam(req.query["q"]);
+    if (q === null) {
+      res.status(400).json({ error: "q is required" });
+      return;
+    }
+    res.json({ facts: await searchFacts(db, q) });
+  });
+
+  /** `getEvidence(factId)` */
+  data.get("/facts/:id/evidence", async (req, res) => {
+    const result = await getEvidence(db, req.params.id);
+    if (result === null) {
+      res.status(404).json({ error: "No such claim" });
+      return;
+    }
+    res.json(result);
+  });
+
+  /** `getHoldings(assetRef)` — open and closed rows, so a transfer is legible. */
+  data.get("/holdings", async (req, res) => {
+    const asset = queryParam(req.query["asset"]);
+    if (asset === null) {
+      res.status(400).json({ error: "asset is required" });
+      return;
+    }
+    const result = await getHoldings(db, asset);
+    if (result === null) {
+      res.status(404).json({ error: "No such asset" });
+      return;
+    }
+    res.json(result);
+  });
+
+  /** `getPerson(alias)` — every match, because several is the ambiguity signal. */
+  data.get("/people", async (req, res) => {
+    const alias = queryParam(req.query["alias"]);
+    if (alias === null) {
+      res.status(400).json({ error: "alias is required" });
+      return;
+    }
+    res.json({ people: await getPerson(db, alias) });
+  });
 
   app.use("/data", data);
 

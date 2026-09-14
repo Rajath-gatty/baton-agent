@@ -25,6 +25,7 @@ console.log(`[worker] agent transport: ${transport.kind}`);
 
 const app = createServer({
   config,
+  db,
   isDatabaseReachable: async () => {
     try {
       await db.execute(sql`select 1`);
