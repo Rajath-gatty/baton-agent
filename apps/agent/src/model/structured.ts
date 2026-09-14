@@ -90,6 +90,67 @@ export class StructuredOutputFailure extends Error {
   }
 }
 
+/**
+ * What one invocation returns, as this file reads it.
+ *
+ * A structural subset of the SDK's result rather than an import, for the same reason
+ * {@link SchemaIssue} is: nothing here should depend on the SDK's type identity. It
+ * also documents exactly how much of that result the retry loop relies on, which is
+ * less than it looks — a stop reason, the last message, the interrupts and the token
+ * counts.
+ */
+export interface StructuredInvocation {
+  stopReason: string;
+  lastMessage: Message;
+  interrupts?: readonly { id: string; name: string; reason?: unknown }[];
+  metrics?: { accumulatedUsage?: { inputTokens?: number; outputTokens?: number } };
+}
+
+/**
+ * The three methods this file uses from an agent.
+ *
+ * **This interface is the reason the retry and repair loop is testable at all.**
+ * Everything worth asserting here happens *after* `invoke` returns: whether a
+ * validation error is fed back naming the failing path, whether the attempt budget
+ * is honoured, whether a failed node still reaches the trace, whether an interrupt
+ * unwinds carrying its snapshot. All of that is our logic, none of it is the model's,
+ * and none of it could be reached without either a live model or a seam. A live model
+ * would make the suite non-deterministic, slow, and — since a cheap model does not
+ * reliably produce malformed output on demand — largely unable to reach the failure
+ * branches, which are the ones that matter.
+ */
+export interface StructuredAgent {
+  invoke(prompt: unknown): Promise<StructuredInvocation>;
+  takeSnapshot(options: { preset: "session" }): unknown;
+  loadSnapshot(snapshot: unknown): void;
+}
+
+/** How an agent is constructed. Overridden in tests; the default is the real SDK. */
+export interface AgentSpec {
+  role: AgentRole;
+  node: string;
+  systemPrompt: string;
+  config: AgentConfig;
+  tools?: ToolList;
+}
+
+export type AgentFactory = (spec: AgentSpec) => StructuredAgent;
+
+/**
+ * The real factory: a Strands `Agent` on the configured provider.
+ *
+ * `printer: false` because the container writes structured logs and the SDK's console
+ * printer would interleave partial model output into them.
+ */
+export const defaultAgentFactory: AgentFactory = (spec) =>
+  new Agent({
+    model: buildModel(spec.role, spec.config),
+    systemPrompt: spec.systemPrompt,
+    id: spec.node,
+    printer: false,
+    ...(spec.tools === undefined ? {} : { tools: spec.tools }),
+  }) as unknown as StructuredAgent;
+
 export interface StructuredCallOptions<T> {
   role: AgentRole;
   /** The node name as it appears in the trace and in the register's activity panel. */
@@ -108,12 +169,8 @@ export interface StructuredCallOptions<T> {
    * the accessor rather than this file guessing.
    */
   reasoningOf?: (value: T) => string | undefined;
-  /**
-   * Registers hooks on the freshly built agent before it is invoked. This is where
-   * an approval interrupt is attached, since a hook must be registered before the
-   * call it guards.
-   */
-  configureAgent?: (agent: Agent) => void;
+  /** Overridden in tests. See {@link StructuredAgent}. */
+  agentFactory?: AgentFactory;
 }
 
 /** Concatenates the text blocks of a message, ignoring reasoning and tool blocks. */
@@ -177,21 +234,16 @@ export async function callStructured<T>(options: StructuredCallOptions<T>): Prom
     tools,
     maxAttempts = DEFAULT_MAX_ATTEMPTS,
     reasoningOf,
-    configureAgent,
+    agentFactory = defaultAgentFactory,
   } = options;
 
-  const model = buildModel(role, config);
-  const agent = new Agent({
-    model,
+  const agent = agentFactory({
+    role,
+    node,
     systemPrompt,
-    id: node,
-    // The container writes structured logs; the SDK's console printer would
-    // interleave partial model output into them.
-    printer: false,
+    config,
     ...(tools === undefined ? {} : { tools }),
   });
-
-  configureAgent?.(agent);
 
   const startedAt = Date.now();
   let lastError = "no attempt was made";
@@ -294,6 +346,8 @@ export interface ResumeOptions {
   config: AgentConfig;
   trace: TraceCollector;
   tools?: ToolList;
+  /** Overridden in tests. See {@link StructuredAgent}. */
+  agentFactory?: AgentFactory;
 }
 
 /**
@@ -309,17 +363,28 @@ export interface ResumeOptions {
  * waiting to be told.
  */
 export async function resumeStructured(options: ResumeOptions): Promise<unknown> {
-  const { role, node, systemPrompt, snapshot, answers, schema, config, trace, tools } = options;
-
-  const agent = new Agent({
-    model: buildModel(role, config),
+  const {
+    role,
+    node,
     systemPrompt,
-    id: node,
-    printer: false,
+    snapshot,
+    answers,
+    schema,
+    config,
+    trace,
+    tools,
+    agentFactory = defaultAgentFactory,
+  } = options;
+
+  const agent = agentFactory({
+    role,
+    node,
+    systemPrompt,
+    config,
     ...(tools === undefined ? {} : { tools }),
   });
 
-  agent.loadSnapshot(snapshot as Parameters<Agent["loadSnapshot"]>[0]);
+  agent.loadSnapshot(snapshot);
 
   const startedAt = Date.now();
   const result = await agent.invoke(
@@ -331,7 +396,7 @@ export async function resumeStructured(options: ResumeOptions): Promise<unknown>
           ...(answer.answerText === undefined ? {} : { answer: answer.answerText }),
         },
       },
-    })) as Parameters<Agent["invoke"]>[0],
+    })),
   );
 
   if (isInterrupted(result.stopReason)) {

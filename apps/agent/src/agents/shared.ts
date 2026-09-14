@@ -8,6 +8,7 @@
  */
 
 import type { AgentConfig } from "../config.js";
+import type { AgentFactory } from "../model/structured.js";
 import type { TraceCollector } from "../model/trace.js";
 import type { DataApiClient } from "../tools/data-api.js";
 
@@ -15,6 +16,17 @@ export interface AgentDeps {
   config: AgentConfig;
   trace: TraceCollector;
   dataApi: DataApiClient;
+  /**
+   * How the underlying model agent is constructed. Absent in the container, where
+   * the real provider is used; supplied by tests, which is what makes the sentence
+   * above about exercising an agent without a network actually true.
+   */
+  agentFactory?: AgentFactory;
+}
+
+/** Passes the factory through only when one was supplied — `exactOptionalPropertyTypes`. */
+export function factoryOption(deps: AgentDeps): { agentFactory?: AgentFactory } {
+  return deps.agentFactory === undefined ? {} : { agentFactory: deps.agentFactory };
 }
 
 /**

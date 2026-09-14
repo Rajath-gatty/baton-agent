@@ -28,7 +28,7 @@ import {
   type AssessorOutput,
 } from "@baton/core";
 import { callStructured } from "../model/structured.js";
-import { buildInput, section, type AgentDeps } from "./shared.js";
+import { buildInput, factoryOption, section, type AgentDeps } from "./shared.js";
 import { toolsFor } from "../tools/index.js";
 
 /**
@@ -122,6 +122,7 @@ export async function runAssessor(
     schema: assessorOutputSchema,
     config: deps.config,
     trace: deps.trace,
+    ...factoryOption(deps),
     tools: toolsFor("assessor", { dataApi: deps.dataApi, trace: deps.trace }),
     reasoningOf: (value) => {
       const suppressed = value.findings.filter((finding) => finding.suppress).length;

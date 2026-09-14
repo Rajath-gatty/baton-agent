@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "//": "Typechecks the tests, which the build config deliberately excludes: tests must not land in dist. Without this, test files are only ever transpiled by vitest, which strips types without checking them — so a test could construct a value the production code would reject and still pass.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "noEmit": true,
+    "incremental": false,
+    "rootDir": "."
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

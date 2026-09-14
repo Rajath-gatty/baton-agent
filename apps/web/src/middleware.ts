@@ -1,11 +1,19 @@
 /**
  * The perimeter.
  *
- * Every page and every API route is behind the gate; only the gate itself and
- * the static shell are open. The distinction that matters to the coordinator:
- * arriving with no cookie is simply "not signed in", while arriving with a
- * cookie that no longer verifies is "your session expired" — a different, gentler
- * message, so ?expired=1 is set only in the second case.
+ * Every page and every API route is behind the gate; only the gate itself and the
+ * static shell are open. The distinction that matters to the coordinator: arriving
+ * with no cookie is simply "not signed in", while arriving with a cookie that no
+ * longer verifies is "your session expired" — a different, gentler message, so
+ * ?expired=1 is set only in the second case.
+ *
+ * THE FILE'S LOCATION IS LOAD-BEARING. This app keeps its code under `src/`, and
+ * Next only picks middleware up from beside the `app` directory — so `src/`, not
+ * the workspace root. It sat at `apps/web/middleware.ts` and was silently never
+ * invoked: `GET /` returned the full admin UI, findings and all, to a request with
+ * no cookie. Nothing failed, nothing warned, and the only symptom was the absence
+ * of a redirect nobody had checked for. If this file is ever moved, the redirect
+ * test is the thing that catches it.
  *
  * This runs in the Edge runtime, so it verifies the token with `jose` directly
  * rather than importing the app's `session` module — that module is marked

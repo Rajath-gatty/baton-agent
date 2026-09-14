@@ -33,7 +33,7 @@ import {
   type SchemaValidator,
 } from "../model/structured.js";
 import type { AgentRole } from "../model/provider.js";
-import type { AgentDeps } from "../agents/shared.js";
+import { factoryOption, type AgentDeps } from "../agents/shared.js";
 import { toolsFor } from "../tools/index.js";
 
 /**
@@ -118,5 +118,6 @@ export async function runResume(request: AgentRequest, deps: AgentDeps): Promise
     config: deps.config,
     trace: deps.trace,
     tools: toolsFor(target.role, { dataApi: deps.dataApi, trace: deps.trace }),
+    ...factoryOption(deps),
   });
 }

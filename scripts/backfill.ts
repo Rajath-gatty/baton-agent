@@ -26,20 +26,11 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { sql } from "drizzle-orm";
 import { createDatabase, messages, PIPELINE_LOCK_KEY } from "@baton/core/db";
-import { loadDotEnv } from "@baton/core";
-import type { SeedMessage } from "@baton/core/intake";
+import { loadDotEnv } from "@baton/core/env";
+import type { SeedTranscript } from "@baton/core/intake";
 import { PLAN_FIXTURE_PATH, TRANSCRIPT_PATH } from "./src/seed/paths.js";
-import { loadIdentity, type AccountBinding, type PlanIdentity } from "./src/backfill/identity.js";
+import { loadIdentity, type PlanIdentity } from "./src/backfill/identity.js";
 import { loadMessages } from "./src/backfill/messages.js";
-
-interface Transcript {
-  planVersion: number;
-  months: number;
-  windowStart: string;
-  windowEnd: string;
-  accountBindings: AccountBinding[];
-  messages: SeedMessage[];
-}
 
 function arg(name: string): string | undefined {
   const index = process.argv.indexOf(`--${name}`);
@@ -102,9 +93,9 @@ async function main(): Promise<void> {
     planVersion: number;
   };
 
-  let transcript: Transcript;
+  let transcript: SeedTranscript;
   try {
-    transcript = JSON.parse(readFileSync(TRANSCRIPT_PATH, "utf8")) as Transcript;
+    transcript = JSON.parse(readFileSync(TRANSCRIPT_PATH, "utf8")) as SeedTranscript;
   } catch {
     console.error(
       `No transcript at ${TRANSCRIPT_PATH}.\nRun \`pnpm seed:transcript\` first — it is gitignored and derived, so a fresh clone has none.`,
@@ -157,9 +148,19 @@ async function main(): Promise<void> {
           `${identity.boundAccounts} bound to Telegram)`,
       );
 
+      // Built here rather than inside `loadIdentity` because the bindings belong to the
+      // transcript, not to the plan: the same roster can be rendered with different
+      // accounts bound, and the adapter needs the ones this artifact was rendered with.
+      const telegramUserIdByPlanId = new Map(
+        transcript.accountBindings
+          .filter((binding) => binding.telegramUserId !== null)
+          .map((binding) => [binding.personId, binding.telegramUserId as number] as const),
+      );
+
       const loaded = await loadMessages(db, transcript.messages, {
         chatId,
         personIdByPlanId: identity.personIdByPlanId,
+        telegramUserIdByPlanId,
       });
 
       const kept = loaded.read === 0 ? 0 : Math.round((loaded.candidates / loaded.read) * 100);
@@ -167,6 +168,7 @@ async function main(): Promise<void> {
       console.log(`  candidates  ${loaded.candidates} (${kept}% kept for curation)`);
       console.log(`  discarded   ${loaded.discarded} by the pre-filter`);
       console.log(`  unprocessed ${loaded.unprocessed} media with no text`);
+      console.log(`  edits       ${loaded.edits} replayed as an upsert over the original`);
 
       const [stored] = await db.execute<{ total: number }>(
         sql`select count(*)::int as total from ${messages}`,

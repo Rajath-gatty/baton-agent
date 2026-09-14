@@ -1,0 +1,9 @@
+# Kept deliberately, even though it is empty.
+#
+# apps/web/Dockerfile copies `/repo/apps/web/public` into the runtime image
+# unconditionally, and Docker fails a COPY whose source does not exist. Next.js
+# does not require a public directory, so nothing else would have created one —
+# the image build simply fails on a fresh clone with an error that reads as a
+# Dockerfile bug rather than a missing directory.
+#
+# Delete this only together with that COPY line.

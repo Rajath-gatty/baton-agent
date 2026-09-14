@@ -16,15 +16,31 @@ const BOT_ID = 777;
 const BOT_USERNAME = "batonbot";
 const OPTIONS = { botUserId: BOT_ID, botUsername: BOT_USERNAME };
 
-function message(overrides: Partial<TelegramMessage> = {}): TelegramMessage {
-  return {
+/**
+ * Builds a Telegram message, where an override of `undefined` means **the key is
+ * absent** rather than present and undefined — a photo message has no `text` key at
+ * all, which is the case this file needs.
+ */
+function message(
+  overrides: { [K in keyof TelegramMessage]?: TelegramMessage[K] | undefined } = {},
+): TelegramMessage {
+  const built: Record<string, unknown> = {
     message_id: 10,
     from: { id: 5001, first_name: "Priya" },
     date: 1_780_000_000,
     chat: { id: -1001234567890, type: "supergroup" },
     text: "who has the store room key?",
-    ...overrides,
   };
+
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value === undefined) {
+      delete built[key];
+    } else {
+      built[key] = value;
+    }
+  }
+
+  return built as unknown as TelegramMessage;
 }
 
 describe("question detection", () => {

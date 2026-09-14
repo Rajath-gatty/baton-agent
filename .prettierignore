@@ -11,3 +11,8 @@ drizzle/
 # Generated, and compared byte for byte by scripts/test/seed-coverage.test.ts against
 # what seed-plan.ts writes. Formatting it would make that check fail on a clean tree.
 scripts/fixtures/
+
+# Scratch artifacts — captured page dumps, diagnostic output. Untracked by design, but
+# `pnpm format` walks the working tree rather than the index, so an uncommitted scratch
+# file would otherwise fail the check for everybody.
+tmp-*

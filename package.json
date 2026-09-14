@@ -13,7 +13,8 @@
   "scripts": {
     "typecheck": "pnpm -r --stream typecheck",
     "build": "pnpm -r --stream build",
-    "test": "pnpm -r --stream test",
+    "//test": "Builds @baton/core first, deliberately. Core's exports resolve to dist, not src, so a stale dist does not error — it silently serves the PREVIOUS API. That masked an incomplete refactor: the agent suite passed against yesterday's compiled core while src had moved on. Only core is built, not `pnpm build`, because the apps/web standalone build fails with EPERM on Windows and would block the whole suite.",
+    "test": "pnpm --filter @baton/core build && pnpm -r --workspace-concurrency=1 --stream test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",

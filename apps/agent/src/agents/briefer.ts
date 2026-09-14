@@ -23,7 +23,7 @@ import {
   type BrieferOutput,
 } from "@baton/core";
 import { callStructured } from "../model/structured.js";
-import { buildInput, section, type AgentDeps } from "./shared.js";
+import { buildInput, factoryOption, section, type AgentDeps } from "./shared.js";
 import { toolsFor } from "../tools/index.js";
 
 /** Whether there is anything at all to write a brief about. */
@@ -94,6 +94,7 @@ export async function runBriefer(
     schema: brieferOutputSchema,
     config: deps.config,
     trace: deps.trace,
+    ...factoryOption(deps),
     tools: toolsFor("briefer", { dataApi: deps.dataApi, trace: deps.trace }),
     reasoningOf: (value) => {
       const bySection = value.lines.reduce<Record<string, number>>((counts, line) => {

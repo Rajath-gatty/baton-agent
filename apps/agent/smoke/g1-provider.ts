@@ -20,7 +20,7 @@
 
 import { fileURLToPath } from "node:url";
 import { Agent } from "@strands-agents/sdk";
-import { loadDotEnv } from "@baton/core";
+import { loadDotEnv } from "@baton/core/env";
 import { loadConfig } from "../src/config.js";
 import { buildModel, modelIdFor } from "../src/model/provider.js";
 

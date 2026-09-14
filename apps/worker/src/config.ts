@@ -14,7 +14,26 @@ const configSchema = z
     DATABASE_URL: z.string().min(1),
 
     TELEGRAM_BOT_TOKEN: z.string().min(1),
-    TELEGRAM_CHAT_ID: z.string().min(1),
+    /**
+     * The **one** group Baton reads. Singular, and validated as such.
+     *
+     * Everything downstream takes a single number — `IntakeLoop`, `app_settings.chat_id`,
+     * and the `(chat_id, telegram_message_id)` unique constraint — and the design is
+     * explicit that messages from any other chat are ignored. A comma-separated list
+     * here would parse as `NaN` and match no chat at all, so the bot would appear to be
+     * in the group, poll successfully, and silently ignore every message. That failure
+     * is indistinguishable from privacy mode being left on, which is the other thing
+     * that produces exactly no messages.
+     */
+    TELEGRAM_CHAT_ID: z
+      .string()
+      .min(1)
+      .refine((value) => Number.isSafeInteger(Number(value.trim())), {
+        message:
+          "must be a single integer chat id (a supergroup id is negative, e.g. -1001234567890). " +
+          "A comma-separated list is not supported: Baton reads exactly one group, and a list " +
+          "would match none of them while still polling successfully",
+      }),
     COORDINATOR_TELEGRAM_ID: z.string().min(1),
 
     /**
@@ -94,6 +113,16 @@ export function coordinatorTelegramIds(config: WorkerConfig): number[] {
       // and read as "the coordinator cannot approve" with no explanation anywhere.
       .filter((id) => Number.isSafeInteger(id))
   );
+}
+
+/**
+ * The one group Baton reads, as a number.
+ *
+ * Validated by the schema, so this cannot fail — it exists so no caller has to remember
+ * that the environment holds a string while every consumer wants a number.
+ */
+export function telegramChatId(config: WorkerConfig): number {
+  return Number(config.TELEGRAM_CHAT_ID.trim());
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): WorkerConfig {

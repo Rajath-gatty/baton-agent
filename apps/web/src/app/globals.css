@@ -59,12 +59,21 @@
   --text-lead: 1rem;
   --text-sub: 1.25rem;
   --text-head: 1.5rem;
-  --text-state: 1.9375rem;
+  --text-state: 1.75rem;
+
+  /* The board strip's height, named because three things depend on it: the
+     sticky offset, every section's `scroll-margin-top`, and the first-viewport
+     budget. A magic number repeated in three files drifts. */
+  --board-height: 2.75rem;
 }
 
 @layer base {
   html {
     background: var(--color-paper);
+    /* One page, four stops. In-page navigation must glide rather than jump, or
+       a reader loses their place in a document this dense. Suppressed under
+       reduced-motion below. */
+    scroll-behavior: smooth;
   }
 
   body {
@@ -74,7 +83,15 @@
     line-height: 1.45;
     /* Numbers sit in columns everywhere in this product. */
     font-variant-numeric: tabular-nums;
+    /* Barlow's default figures are already lining; asking for contextual
+       alternates and kerning explicitly keeps the condensed board lettering
+       tight at label sizes, where the default spacing reads loose. */
+    font-feature-settings:
+      "kern" 1,
+      "calt" 1;
+    text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* One visible focus treatment for the whole app. */
@@ -91,6 +108,10 @@
   /* Motion conveys state only, 150–250ms. No page-load choreography: the
      coordinator is loading into a task, not watching an intro. */
   @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
     *,
     *::before,
     *::after {
@@ -101,6 +122,41 @@
 }
 
 @layer components {
+  /* ── the one page ──────────────────────────────────────────────────────────
+     The whole admin UI is a single document with four stops. The board strip is
+     sticky, so every stop has to reserve its height when scrolled to, or an
+     anchored heading lands underneath the bar.
+   */
+
+  .board-strip {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    min-height: var(--board-height);
+    background: var(--color-board);
+    color: var(--color-board-ink);
+    /* A hairline of the signage blue under the strip: it reads as the ruled top
+       edge of the sheet rather than as a shadow, which this world has none of. */
+    box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--color-signal) 60%, transparent);
+  }
+
+  .stop {
+    scroll-margin-top: calc(var(--board-height) + 0.75rem);
+  }
+
+  /* The heading that opens each stop below the first. The first stop needs no
+     heading — the state of the organisation is its heading. */
+  .stop-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-top: 2px solid var(--color-rule-strong);
+    padding-top: 0.625rem;
+    margin-top: 2.25rem;
+    margin-bottom: 0.875rem;
+  }
+
   /* ── the sheet ─────────────────────────────────────────────────────────── */
 
   .sheet {
@@ -124,6 +180,79 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--color-ink-faint);
+  }
+
+  /* ── in-page navigation ───────────────────────────────────────────────────
+     One page means the nav marks position rather than changing location, so the
+     current stop carries the single signage blue on its bottom edge — the same
+     treatment the multi-page build used for the current route, kept so the
+     gesture reads identically.
+   */
+
+  .nav-stop {
+    display: flex;
+    align-items: center;
+    padding: 0 0.75rem;
+    font-family: var(--font-board);
+    font-size: var(--text-meta);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-board-ink);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition:
+      color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .nav-stop:hover {
+    color: #fff;
+  }
+
+  .nav-stop[aria-current="true"] {
+    color: #fff;
+    border-bottom-color: var(--color-signal);
+  }
+
+  /* ── disclosure ───────────────────────────────────────────────────────────
+     The two set-aside lists are folded, not hidden: a `details` element keeps
+     them one gesture away and, unlike a separate route, keeps them inside the
+     single page and inside the browser's own find-on-page once opened.
+   */
+
+  .disclosure > summary {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    cursor: pointer;
+    list-style: none;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-rule);
+    border-radius: 2px;
+    background: var(--color-sheet-alt);
+    transition: border-color 160ms ease;
+  }
+
+  .disclosure > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .disclosure > summary:hover {
+    border-color: var(--color-ink-muted);
+  }
+
+  .disclosure[open] > summary {
+    border-bottom-color: var(--color-rule-strong);
+  }
+
+  .disclosure > summary .disclosure-hint::after {
+    content: "Open";
+  }
+
+  .disclosure[open] > summary .disclosure-hint::after {
+    content: "Close";
   }
 
   /* ── status codes ──────────────────────────────────────────────────────── */

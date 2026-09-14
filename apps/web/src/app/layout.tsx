@@ -1,19 +1,33 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 
 /*
  * Barlow and Barlow Condensed. One family, two widths: the upright carries body,
- * labels and data; the condensed carries the board lettering, status codes and
- * the state line. Barlow's letterforms come from signage grotesques, which is the
- * reason it is here rather than a UI default.
+ * labels and data; the condensed carries the board lettering, status codes and the
+ * state line. Barlow's letterforms come from signage grotesques, which is the
+ * reason it is here rather than a UI default — this product's whole visual claim is
+ * that it is a working chart, and a chart is set in signage type.
+ *
+ * Both are loaded through `next/font`, which self-hosts the files and emits them
+ * with the CSS variables below, so there is no runtime request to Google and no
+ * flash of an unstyled fallback. `display: "swap"` is still correct: text must be
+ * readable while a face loads.
+ *
+ * The weights are exactly the ones used. Barlow 400/500/600 for body, emphasis and
+ * the small labels; Condensed 500/600/700 because the board lettering needs a
+ * heavier top end and no light one — a 300 in a condensed face at label size
+ * disappears against newsprint grey. Adding an unused weight is not free: each is a
+ * font file the first paint waits on.
  */
 const barlow = Barlow({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-barlow",
   display: "swap",
+  preload: true,
+  fallback: ["ui-sans-serif", "system-ui", "Segoe UI", "sans-serif"],
 });
 
 const barlowCondensed = Barlow_Condensed({
@@ -21,12 +35,25 @@ const barlowCondensed = Barlow_Condensed({
   weight: ["500", "600", "700"],
   variable: "--font-barlow-condensed",
   display: "swap",
+  preload: true,
+  fallback: ["ui-sans-serif", "system-ui", "Segoe UI", "sans-serif"],
 });
 
 export const metadata: Metadata = {
   title: "Baton",
   description: "A continuity risk register for volunteer groups.",
   robots: { index: false, follow: false },
+};
+
+/**
+ * Desktop only, by design — there is no mobile layout, and the register is a chart
+ * that cannot honestly be narrowed. The viewport is declared rather than left to
+ * Next's default so a phone renders the document zoomed out and legible instead of
+ * reflowing a chart into a column.
+ */
+export const viewport: Viewport = {
+  width: "1280",
+  themeColor: "#1a1f21",
 };
 
 /**
@@ -43,7 +70,13 @@ is at stake when the only record a group has is its group chat.
 
 OWN-WORLD: A working ledger sheet. Grey-green newsprint ground, hairline rules, dense
 ruled rows, condensed lettering carrying structure, one signage blue spent only on
-primary action and selection, and status set in the product's own five-state vocabulary.
+primary action and current position, and status set in the product's own five-state
+vocabulary.
+
+SHAPE: One page, four stops — Continuity, Who holds what, Briefs, Set aside — behind a
+single shared-passcode gate. Not five routes: the reading is continuous, the fact panel
+is mounted once for the whole document, and what was withheld stays a scroll from what
+was raised rather than a click into another screen.
 
 STORY: The coordinator learns what the organisation is exposed to, sees that Baton held
 some things back, and can trace any claim to the sentence a volunteer actually typed.

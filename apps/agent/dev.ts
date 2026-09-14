@@ -20,7 +20,7 @@
  */
 
 import { fileURLToPath } from "node:url";
-import { loadDotEnv } from "@baton/core";
+import { loadDotEnv } from "@baton/core/env";
 
 const result = loadDotEnv(fileURLToPath(new URL("../../.env", import.meta.url)), {
   override: true,

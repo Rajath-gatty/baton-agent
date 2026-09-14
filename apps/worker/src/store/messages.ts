@@ -77,6 +77,52 @@ export async function findMessageIdByTelegramId(
   return rows[0]?.id ?? null;
 }
 
+/** What `dispositionOfReply` needs about a stored message, and nothing more. */
+export interface ReplyContext {
+  messageId: string;
+  senderPersonId: string | null;
+  text: string;
+  sentAt: Date;
+}
+
+/**
+ * Reads back the fields a reply disposition needs.
+ *
+ * `persistMessage` returns only the row id, because that is all the intake loop needs to
+ * carry the message forward. Deciding whether a reply *answers an approval* needs the
+ * sender and the text as stored — as stored specifically, because an edited message must
+ * be judged on the text the group can currently see, not on what the update happened to
+ * carry.
+ *
+ * A null `senderPersonId` is returned rather than treated as an error: an unresolved
+ * sender is a legitimate state, and the approval gate is what refuses it.
+ */
+export async function findReplyContext(
+  db: Executor,
+  messageId: string,
+): Promise<ReplyContext | null> {
+  const rows = await db
+    .select({
+      id: messages.id,
+      senderPersonId: messages.senderPersonId,
+      text: messages.text,
+      sentAt: messages.sentAt,
+    })
+    .from(messages)
+    .where(eq(messages.id, messageId))
+    .limit(1);
+
+  const row = rows[0];
+  if (row === undefined) return null;
+
+  return {
+    messageId: row.id,
+    senderPersonId: row.senderPersonId,
+    text: row.text ?? "",
+    sentAt: row.sentAt,
+  };
+}
+
 /**
  * Persists one normalised message.
  *

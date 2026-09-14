@@ -1,0 +1,386 @@
+﻿
+> @baton/worker@0.1.0 test G:\Hackathon\baton-agent\apps\worker
+> pnpm --filter @baton/core build && vitest run --passWithNoTests
+
+
+> @baton/core@0.1.0 build G:\Hackathon\baton-agent\packages\core
+> tsc --build
+
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mG:/Hackathon/baton-agent/apps/worker[39m
+
+ [32m✓[39m test/processing-loop.test.ts [2m([22m[2m28 tests[22m[2m)[22m[33m 101414[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mthe cache, before batches exist[2m > [22mforms no batch at all when every candidate is cached [33m 3383[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mthe cache, before batches exist[2m > [22mbatches only the misses when a pass is part cached [33m 5008[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mthe cache, before batches exist[2m > [22msplits misses into batches of ten, in sent_at order [33m 12911[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mthe cache, before batches exist[2m > [22mstores one cache row per message, keyed on content [33m 3028[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mthe cache, before batches exist[2m > [22mcounts two identical messages as one cache row [33m 2829[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mbatch composition and cached classifications[2m > [22mleaves a cached classification untouched when its neighbours change [33m 6816[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mattribution for cached records[2m > [22mresolves a cached holder mention against the alias table as it stands now [33m 2669[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mattribution for cached records[2m > [22mturns an ambiguous cached mention into an unresolved mention, never a holding [33m 2610[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mattribution for cached records[2m > [22mattributes records without guessing when no alias matches [33m 1310[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mattribution for cached records[2m > [22mattributes a mention appearing as both holder and subject exactly once [33m 708[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mhydration[2m > [22mcarries the org, the aliases and the assets — and no fact index [33m 1673[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mhydration[2m > [22msends no fact index to the agent even once the register holds facts [33m 5661[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mhydration[2m > [22mkeeps two people sharing an alias as two entries [33m 1185[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mthe pipeline lock[2m > [22mlets one pass through and tells the other the work is already being done [33m 3418[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mthe pipeline lock[2m > [22mreleases the lock when the pass fails [33m 3111[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mthe run row[2m > [22mrecords a completed pass with its counters and trace [33m 5041[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mthe run row[2m > [22msurvives the rollback of the pass it describes [33m 2167[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mthe run row[2m > [22mreports into a run the caller already opened, and leaves it open [33m 2661[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mcuration state[2m > [22mstamps curated_at only after the writes land [33m 2904[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mcuration state[2m > [22mdoes not re-curate on a second pass [33m 4348[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mcuration state[2m > [22mkeeps the classifications a failed pass already paid for [33m 3921[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mcoverage and the F33 gate[2m > [22mrecords coverage from a firsthand observation [33m 4308[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mcoverage and the F33 gate[2m > [22mrefuses to record coverage from hearsay [33m 4731[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mcoverage and the F33 gate[2m > [22mrefuses to record coverage from a claim too weak to be believed [33m 3436[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mrecord ordering[2m > [22mapplies a contradiction after the claim it contradicts [33m 5179[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22msplitIngestResult[2m > [22mre-bases each message's attributions onto its own records [33m 726[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22msplitIngestResult[2m > [22mdrops an attribution indexed past the end of the batch [33m 854[2mms[22m[39m
+   [33m[2m✓[22m[39m the processing loop[2m > [22mwhat the agent is told about a message[2m > [22msends the sender's recorded name and the parent message's text [33m 4323[2mms[22m[39m
+ [32m✓[39m test/brief.test.ts [2m([22m[2m29 tests[22m[2m)[22m[33m 71465[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mthe departure brief[2m > [22mstores the brief and its lines, in section order [33m 3998[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mthe departure brief[2m > [22mnumbers positions per section rather than across the whole list [33m 2390[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mthe departure brief[2m > [22mrenders the brief as something a person can read [33m 776[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mthe empty brief[2m > [22mis generated and stored rather than skipped [33m 2893[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mthe empty brief[2m > [22mrenders as the opening line alone [33m 703[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mone brief per transition[2m > [22mdoes not generate a second brief for the same departure [33m 2886[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mone brief per transition[2m > [22mgenerates a second brief for a later departure by the same person [33m 2999[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mone brief per transition[2m > [22mdoes not confuse an arrival brief with a departure brief [33m 2503[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mone brief per transition[2m > [22mcan be forced past the guard [33m 2905[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mone brief per transition[2m > [22mstill briefs a person with no recorded transition date [33m 1444[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mdelivery[2m > [22msends to the coordinator and to the subject [33m 2184[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mdelivery[2m > [22mstores the brief even when nobody can be reached [33m 2689[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mdelivery[2m > [22mreaches the coordinator even when the departing member cannot be messaged [33m 2712[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mRestraint on the brief path[2m > [22mrecords a withheld line under the brief_line scope [33m 3173[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mRestraint on the brief path[2m > [22mstores a brief whose every line was withheld as an empty one [33m 2935[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mthe brief context[2m > [22mscopes a departure to the subject [33m 4055[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mthe brief context[2m > [22mcounts other holders so a shared thing is not a handover item [33m 1722[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mthe brief context[2m > [22mkeeps a pending claim out of a brief [33m 1718[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mthe brief context[2m > [22mscopes an arrival to the register's gaps instead of to the subject [33m 4157[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mthe brief context[2m > [22mis what the pass actually sends [33m 2794[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mruns and failure[2m > [22mrecords a completed run with the trace [33m 1843[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mruns and failure[2m > [22mrecords a failed run and writes no brief [33m 1928[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mruns and failure[2m > [22mrefuses to brief a person who does not exist [33m 763[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mreading and assigning[2m > [22mclears the unread banner once, and only once [33m 1931[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mreading and assigning[2m > [22massigns a line without sending anything [33m 2552[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mreading and assigning[2m > [22mclears an assignment and its timestamp together [33m 2468[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mfiring from a Telegram membership event[2m > [22mproduces a departure brief from a chat_member update, with no button pressed [33m 2950[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mfiring from a Telegram membership event[2m > [22mproduces no brief for a promotion [33m 768[2mms[22m[39m
+   [33m[2m✓[22m[39m briefs[2m > [22mfiring from a Telegram membership event[2m > [22mproduces an arrival brief when someone joins [33m 3516[2mms[22m[39m
+ [32m✓[39m test/detection.test.ts [2m([22m[2m42 tests[22m[2m)[22m[33m 72457[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — assets[2m > [22mfinds an asset exactly one person holds [33m 1744[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — assets[2m > [22mdoes not report an asset two people hold — as one finding or as two [33m 1467[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — assets[2m > [22mnames an external holder even though they have no people row [33m 1331[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — assets[2m > [22mignores a personal resource, which is not_ours rather than a one-person risk [33m 1301[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — assets[2m > [22mignores a released holding [33m 1498[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — assets[2m > [22mignores a retired asset [33m 1347[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — assets[2m > [22mdoes not treat a holding with no holder as one person holding it [33m 1166[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — assets[2m > [22mis blind to a holding whose claim is still pending approval [33m 1210[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — assets[2m > [22mis blind to a holding resting on hearsay [33m 1126[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — assets[2m > [22mis blind to a holding whose claim was superseded [33m 1186[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — capabilities[2m > [22mfinds a capability exactly one person has been seen doing [33m 1037[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — capabilities[2m > [22mdoes not report a capability two people have been seen doing [33m 1186[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — capabilities[2m > [22mkeeps a capability whose only person has left [33m 1435[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22msole_holder — capabilities[2m > [22mgives an asset finding and a capability finding different keys [33m 1545[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mno_owner[2m > [22mfinds an active asset nobody holds [33m 1219[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mno_owner[2m > [22mdoes not report an asset that has a holder [33m 1128[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mno_owner[2m > [22mreports an asset whose only holding was released [33m 1152[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mno_owner[2m > [22mdoes not report an asset held only as someone's personal property [33m 1193[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mno_owner[2m > [22mis silent about an asset whose only claim is pending approval [33m 783[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mno_owner[2m > [22mgathers every active claim about the asset as evidence, de-duplicated [33m 1863[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mnot_ours[2m > [22mfinds an active holding flagged as personal property [33m 1520[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mnot_ours[2m > [22mignores an ordinary holding [33m 1482[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mnot_ours[2m > [22mignores a released personal holding [33m 1495[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mnot_ours[2m > [22mis blind to a personal holding whose claim is unverified [33m 1793[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mloose_end[2m > [22mfinds an overdue dated promise [33m 1003[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mloose_end[2m > [22mleaves a dated promise alone before its deadline [33m 1322[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mloose_end[2m > [22mfinds an undated intention once it is older than the threshold [33m 1118[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mloose_end[2m > [22mleaves an undated intention alone while it is younger than the threshold [33m 1204[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mloose_end[2m > [22mignores a completed promise however overdue it was [33m 1405[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mloose_end[2m > [22mignores an abandoned promise [33m 971[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mloose_end[2m > [22morders by when the promise came due [33m 1641[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mthe assembled candidate set[2m > [22mproduces five candidates across four rendered subtypes [33m 4420[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mthe assembled candidate set[2m > [22mgives every candidate exactly one subject [33m 4280[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mthe assembled candidate set[2m > [22mgives every candidate a unique dedupe key [33m 4835[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mthe assembled candidate set[2m > [22mattaches quoted excerpts, redacted [33m 2159[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mthe assembled candidate set[2m > [22mdoes not quote a withdrawn message [33m 2096[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mthe assembled candidate set[2m > [22mcarries the severity a key held on the previous sweep [33m 1711[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mthe assembled candidate set[2m > [22mreports null previous severity for a key never seen before [33m 1381[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mthe assembled candidate set[2m > [22mwithholds a dismissed key before the Assessor sees it [33m 2075[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mthe assembled candidate set[2m > [22mstill reports a resolved key whose condition has recurred [33m 2018[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mthe assembled candidate set[2m > [22mreturns nothing at all from an empty register [33m 1221[2mms[22m[39m
+   [33m[2m✓[22m[39m detection[2m > [22mthe assembled candidate set[2m > [22mis stable across two identical runs [33m 4732[2mms[22m[39m
+ [32m✓[39m test/approval.test.ts [2m([22m[2m38 tests[22m[2m)[22m[33m 86464[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mthe worker's own gate[2m > [22mholds a high-consequence weak claim and asks about it [33m 4493[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mthe worker's own gate[2m > [22mrecords no session, because there is nothing to resume [33m 1715[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mthe worker's own gate[2m > [22mfires from the processing loop rather than needing a separate call [33m 1775[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mthe worker's own gate[2m > [22mroutes a low-consequence approval to the group [33m 793[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mwho may answer[2m > [22maccepts the coordinator named in app_settings [33m 1155[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mwho may answer[2m > [22maccepts a second operator named in the environment [33m 723[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mwho may answer[2m > [22mrefuses a volunteer [33m 1000[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mwho may answer[2m > [22mleaves the question open when a volunteer says yes [33m 2463[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mwho may answer[2m > [22mleaves the question open when nobody can be identified [33m 1788[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mreading the answer[2m > [22mreads a yes and a no [33m 1022[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mreading the answer[2m > [22mtakes the leading word when a reply contains both [33m 1376[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mreading the answer[2m > [22mcalls anything else unclear [33m 836[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mreading the answer[2m > [22mleaves an unclear reply open rather than declining it [33m 2712[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mapplying and discarding[2m > [22mmakes the claim believed on a yes, with a verified timestamp [33m 3138[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mapplying and discarding[2m > [22mmarks the claim unverified on a no, rather than retiring it [33m 2923[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mapplying and discarding[2m > [22mrecords the answer against the question [33m 5456[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mapplying and discarding[2m > [22mdoes not settle the same proposal twice [33m 3405[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mtwo approvals about one asset[2m > [22mstores the second and asks about only the first [33m 3268[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mtwo approvals about one asset[2m > [22masks about the second once the first resolves [33m 3535[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mtwo approvals about one asset[2m > [22masks about a proposal for a different asset straight away [33m 3873[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22man answer that arrives too late[2m > [22mresolves as obsolete and applies nothing [33m 3391[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22man answer that arrives too late[2m > [22mchecks staleness before it checks who answered [33m 3223[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22man answer that arrives too late[2m > [22mpromotes the next proposal for the asset [33m 5051[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mthe agent-interrupt entrance[2m > [22mstores one session for the response and a proposal per interrupt [33m 1766[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mthe agent-interrupt entrance[2m > [22mresumes the graph with the answer and closes the session [33m 2301[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mthe agent-interrupt entrance[2m > [22mresumes exactly once when the answer lands twice [33m 1932[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mthe agent-interrupt entrance[2m > [22mcloses an abandoned session rather than leaving it open forever [33m 2352[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mmatching a reply to what it answers[2m > [22mmatches an approval by the bot's own message id [33m 2630[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mmatching a reply to what it answers[2m > [22mrefuses to match a verification as an approval [33m 1223[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mmatching a reply to what it answers[2m > [22mtreats a reply to an approval as an answer, not a new question [33m 3571[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mmatching a reply to what it answers[2m > [22mlets anyone answer a verification [33m 1909[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mmatching a reply to what it answers[2m > [22mtreats a reply matching no open question as a new question [33m 1065[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mmatching a reply to what it answers[2m > [22mtreats a message with no reply pointer as a new question [33m 1057[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mthe operator list from the environment[2m > [22mparses a comma-separated list [33m 1157[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mthe operator list from the environment[2m > [22mparses a single id [33m 839[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mthe operator list from the environment[2m > [22mtolerates spaces and trailing separators [33m 872[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mthe operator list from the environment[2m > [22mdrops a non-numeric entry rather than producing NaN [33m 787[2mms[22m[39m
+   [33m[2m✓[22m[39m the approval round trip[2m > [22mwhat the coordinator sees while waiting[2m > [22mlists the proposal alongside the question [33m 2140[2mms[22m[39m
+ [32m✓[39m test/respond.test.ts [2m([22m[2m23 tests[22m[2m)[22m[33m 66180[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mselecting what to answer[2m > [22mfinds only messages flagged as questions to Baton [33m 1796[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mselecting what to answer[2m > [22manswers the oldest first [33m 2046[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mselecting what to answer[2m > [22mskips a withdrawn question [33m 1671[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mselecting what to answer[2m > [22mdoes nothing at all when nothing is waiting [33m 1086[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mthe four outcomes[2m > [22msends an answer to the group, threaded to the question [33m 2597[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mthe four outcomes[2m > [22msends a stale answer the same way, carrying its age [33m 3426[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mthe four outcomes[2m > [22mroutes an ambiguous holder privately even when the model said group [33m 3584[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mthe four outcomes[2m > [22msays nothing for an unknown but records it as handled [33m 2746[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mthe four outcomes[2m > [22mturns an unknown's follow-up into a queued question [33m 3015[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mthe four outcomes[2m > [22mdoes not queue a follow-up when the ask budget is full [33m 4624[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mRestraint withholding[2m > [22msends nothing and records the quiet decision [33m 3253[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mRestraint withholding[2m > [22mmarks a withheld question as handled, so it is not re-judged forever [33m 3741[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22midempotence and failure[2m > [22mdoes not answer the same question twice [33m 2981[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22midempotence and failure[2m > [22mleaves the question unanswered when the send fails [33m 3336[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22midempotence and failure[2m > [22mrecords a failed run and rethrows when the agent errors [33m 4447[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22midempotence and failure[2m > [22manswers several questions in one pass, hydrating the context once [33m 4383[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mthe respond context[2m > [22mcarries the fact index with ages the worker computed [33m 2536[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mthe respond context[2m > [22mkeeps a pending claim out of the fact index [33m 3170[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mthe respond context[2m > [22mkeeps hearsay out of the fact index [33m 3106[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mthe respond context[2m > [22mreports the ask budget as a boolean the worker counted [33m 2286[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mthe respond context[2m > [22msends the asker's name as the group refers to them [33m 3105[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mresolveTarget[2m > [22malways routes an ambiguous holder to the coordinator [33m 1013[2mms[22m[39m
+   [33m[2m✓[22m[39m responding to a question[2m > [22mresolveTarget[2m > [22mhonours the model's target otherwise [33m 937[2mms[22m[39m
+ [32m✓[39m test/sweep.test.ts [2m([22m[2m37 tests[22m[2m)[22m[33m 167533[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe short-circuit[2m > [22mcalls no model at all when the candidate set is unchanged [33m 5375[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe short-circuit[2m > [22mdoes not let the previous severity it wrote change its own fingerprint [33m 4585[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe short-circuit[2m > [22mruns again when a new candidate appears [33m 6547[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe short-circuit[2m > [22mruns again when a candidate's evidence changes [33m 5283[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe short-circuit[2m > [22mstores the fingerprint and the sweep time [33m 3371[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe short-circuit[2m > [22madvances the sweep time even when it short-circuits [33m 4569[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe short-circuit[2m > [22mleaves the old fingerprint in place when the sweep fails [33m 5440[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe short-circuit[2m > [22mwrites a run row even when it short-circuits [33m 6595[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe short-circuit[2m > [22mcan be forced past the short-circuit [33m 6165[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe short-circuit[2m > [22manswers whether a sweep would do anything, without invoking anything [33m 4892[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mdedupe[2m > [22mproduces one finding from two sweeps of the same condition [33m 9113[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mdedupe[2m > [22mkeeps first_seen_at from the first sweep and moves last_seen_at [33m 5944[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mdedupe[2m > [22mnever brings back a dismissed finding [33m 5644[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mdedupe[2m > [22mreopens a resolved finding whose condition has recurred [33m 7482[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe Assessor's dispositions[2m > [22mwrites no row for a suppressed candidate [33m 4163[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe Assessor's dispositions[2m > [22mleaves an already-open finding open when it is later suppressed [33m 6315[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe Assessor's dispositions[2m > [22mcloses a candidate that another finding subsumes [33m 4521[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe Assessor's dispositions[2m > [22mdiscards a judgment for a key that was never a candidate [33m 5571[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe Assessor's dispositions[2m > [22mresolves an open finding the Assessor was never asked about [33m 5191[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe Assessor's dispositions[2m > [22mresolves what is open without invoking anything when nothing is detected [33m 4808[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mtitles must not name a person[2m > [22mreplaces a title that names someone on the roster [33m 4443[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mtitles must not name a person[2m > [22mleaves a title that names no one alone [33m 5724[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mtitles must not name a person[2m > [22mdoes not treat a role reference as a person's name [33m 8562[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mtitles must not name a person[2m > [22mmatches a name regardless of punctuation or case [33m 864[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mtitles must not name a person[2m > [22mbuilds a person-free title for every subtype [33m 1150[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mquiet decisions[2m > [22mrecords what Restraint withheld, with its scope [33m 4720[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mquiet decisions[2m > [22mrecords the same withheld item twice across two sweeps [33m 5415[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe assess context[2m > [22mcarries the org, open commitments and a member count — and no roster [33m 1625[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe assess context[2m > [22mcomputes overdue days itself rather than asking the model [33m 1453[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe assess context[2m > [22mreports null overdue days for a promise not yet due [33m 2112[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe assess context[2m > [22mmeasures an undated promise from when it was made [33m 1217[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe assess context[2m > [22mis what the sweep actually sends [33m 4300[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe fingerprint[2m > [22mignores the order the queries ran in [33m 3083[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe fingerprint[2m > [22mignores the order evidence ids accumulated in [33m 1602[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe fingerprint[2m > [22mchanges when a holder changes [33m 3959[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe fingerprint[2m > [22mis empty-set stable [33m 761[2mms[22m[39m
+   [33m[2m✓[22m[39m the sweep[2m > [22mthe lock[2m > [22mskips when a pass already holds it [33m 3962[2mms[22m[39m
+ [32m✓[39m test/ask-budget.test.ts [2m([22m[2m30 tests[22m[2m)[22m[33m 43902[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mcounting[2m > [22moffers the full budget on an empty register [33m 1639[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mcounting[2m > [22mdoes not count a queued question as open [33m 1255[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mcounting[2m > [22mcounts an answered question against the window but not against open [33m 1225[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mcounting[2m > [22mlets a question asked outside the window fall out of it [33m 1619[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mthe two caps[2m > [22mqueues a third simultaneous ask rather than sending it [33m 2152[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mthe two caps[2m > [22mqueues a fourth ask within twenty-four hours [33m 2853[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mthe two caps[2m > [22mtakes the tighter of the two caps [33m 2066[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mpriority[2m > [22masks an approval before the verifications it arrived behind [33m 2582[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mpriority[2m > [22morders equal priorities oldest first [33m 2765[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mpriority[2m > [22mdoes not let an approval displace something already sent [33m 2233[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mnothing dropped, nothing asked twice[2m > [22mreturns the existing row for an identical unresolved ask [33m 1394[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mnothing dropped, nothing asked twice[2m > [22msuppresses a duplicate of something already asked, not just of something queued [33m 929[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mnothing dropped, nothing asked twice[2m > [22mallows the same text again once the first was resolved [33m 684[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mnothing dropped, nothing asked twice[2m > [22mstamps asked_at exactly once [33m 768[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mnothing dropped, nothing asked twice[2m > [22mrefuses to answer a question that was never sent [33m 928[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22masking[2m > [22msends to the group and records the bot's own message id [33m 760[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22masking[2m > [22mroutes a coordinator-targeted question privately [33m 811[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22masking[2m > [22mleaves a question queued when it cannot be delivered [33m 1558[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22masking[2m > [22mdoes not spend budget on a send Telegram rejected [33m 1308[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22masking[2m > [22msends only as many as the budget allows, best first [33m 2623[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22masking[2m > [22mreads the chat id from settings when none is given [33m 2627[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mwhat the coordinator is waiting on[2m > [22mrenders queued and asked together [33m 659[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mwhat the coordinator is waiting on[2m > [22mdrops a resolved question out of the list [33m 527[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mobsolete[2m > [22mretires a question whose subject has moved on, without refunding budget [33m 1152[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mobsolete[2m > [22mcan retire something that was never asked [33m 759[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mmatching a reply back to its question[2m > [22mmatches on the bot's own message id [33m 1285[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mmatching a reply back to its question[2m > [22mdoes not match an already-answered question [33m 1083[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mmatching a reply back to its question[2m > [22mfalls back to the single open question inside a window [33m 938[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mmatching a reply back to its question[2m > [22mrefuses to guess when two questions are open [33m 1042[2mms[22m[39m
+   [33m[2m✓[22m[39m the ask budget[2m > [22mmatching a reply back to its question[2m > [22mrefuses a question asked before the window [33m 955[2mms[22m[39m
+ [32m✓[39m test/entities.test.ts [2m([22m[2m32 tests[22m[2m)[22m[33m 31266[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mcreates the asset a claim refers to [33m 1512[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mreuses an asset already known, however it was spelled [33m 992[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mratchets sensitivity up and never back down [33m 948[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mraises sensitivity when a later record says it is sensitive [33m 877[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mcreates a capability a record names [33m 608[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mreuses a capability already known [33m 746[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mcreates nothing for a record naming neither an asset nor a capability [33m 835[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mresolving the holder[2m > [22mresolves a person the Cartographer identified [33m 2057[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mresolving the holder[2m > [22mcarries the personal-resource flag, which is not_ours rather than a risk [33m 1904[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mresolving the holder[2m > [22mrecords an external holder as a name, not a person [33m 981[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mresolving the holder[2m > [22mreports no holder when the record names none [33m 932[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mresolving the holder[2m > [22mrefuses to guess an ambiguous holder, and asks instead [33m 1216[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mresolving the holder[2m > [22mtreats cannot_determine as a question too [33m 1102[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mresolving the holder[2m > [22mtreats a missing attribution as unsettled rather than absent [33m 926[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mresolving the holder[2m > [22mrefuses a resolved attribution that names nobody [33m 835[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mresolving participation subjects[2m > [22mcollects everyone a thanks-list names [33m 1181[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mresolving participation subjects[2m > [22mleaves out a subject it could not identify, and asks about them [33m 1083[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mresolving participation subjects[2m > [22mdoes not count the holder twice when they are also listed as a subject [33m 1594[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mattributions across several records[2m > [22mapplies each attribution to the record it belongs to [33m 907[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mattributions across several records[2m > [22mkeeps records from different messages apart [33m 1396[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mlearning alias forms[2m > [22mrecords a nickname the Cartographer resolved [33m 1481[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mlearning alias forms[2m > [22mnever learns a role reference [33m 1132[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mlearning alias forms[2m > [22mdoes not learn from an unresolved mention [33m 839[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mlearning alias forms[2m > [22mwrites one alias row however many records mention it [33m 1390[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mlearning alias forms[2m > [22mis idempotent — a second ingest learns nothing new [33m 1151[2mms[22m[39m
+   [33m[2m✓[22m[39m upserting entities from an ingest result[2m > [22mlearning alias forms[2m > [22mlets two people keep the same first name [33m 2021[2mms[22m[39m
+ [32m✓[39m test/data-api.test.ts [2m([22m[2m29 tests[22m[2m)[22m[33m 50827[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22msearchFacts[2m > [22mmatches the claim text [33m 1394[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22msearchFacts[2m > [22mmatches the asset's name, since that is how people refer to things [33m 2233[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22msearchFacts[2m > [22mnever returns a pending change [33m 776[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22msearchFacts[2m > [22mnever returns hearsay as an answerable claim [33m 867[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22msearchFacts[2m > [22mcomputes the age itself rather than leaving it to a model [33m 924[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22msearchFacts[2m > [22mreports every current holder rather than collapsing to one [33m 953[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22msearchFacts[2m > [22mcarries an external holder through [33m 988[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22msearchFacts[2m > [22mdoes not multiply a fact row per holder [33m 2019[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22msearchFacts[2m > [22mreturns nothing for a blank query rather than the whole register [33m 1382[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22msearchFacts[2m > [22mtreats wildcard characters as literal text [33m 1212[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetEvidence[2m > [22mreturns the messages a claim rests on, oldest first [33m 1482[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetEvidence[2m > [22mcarries the Curator's reasoning, so a strange finding is traceable [33m 2126[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetEvidence[2m > [22mredacts a credential out of quoted text [33m 2010[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetEvidence[2m > [22mdoes not quote a message whose provenance was withdrawn [33m 5316[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetEvidence[2m > [22mreports a missing claim rather than an empty one [33m 1180[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetEvidence[2m > [22mrejects an id that is not a uuid without touching the database [33m 1762[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetHoldings[2m > [22mreturns closed rows as well as open ones [33m 3601[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetHoldings[2m > [22morders the history oldest first, so a transfer reads as a sequence [33m 2186[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetHoldings[2m > [22mmarks a personal resource, which is not_ours rather than a risk [33m 1303[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetHoldings[2m > [22maccepts an asset name as well as an id [33m 1671[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetHoldings[2m > [22mfinds an asset by name even when the article differs [33m 2668[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetHoldings[2m > [22mreports an unknown asset rather than an empty history [33m 1491[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetPerson[2m > [22mreturns every person a first name could mean [33m 1402[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetPerson[2m > [22mresolves a handle to one person [33m 1607[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetPerson[2m > [22mnormalises the alias, so punctuation and case do not matter [33m 1619[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetPerson[2m > [22mfinds a person by display name even with no alias rows [33m 1122[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetPerson[2m > [22mcollects the aliases that matched, one row per person [33m 1979[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetPerson[2m > [22mreturns nothing for a name it does not know [33m 1531[2mms[22m[39m
+   [33m[2m✓[22m[39m the data API[2m > [22mgetPerson[2m > [22mreturns nothing for a blank alias [33m 1598[2mms[22m[39m
+ [32m✓[39m test/facts.test.ts [2m([22m[2m25 tests[22m[2m)[22m[33m 41882[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22ma claim the register does not hold[2m > [22mis inserted, active, with the message as its evidence [33m 2801[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22ma claim the register does not hold[2m > [22mrecords the Curator's reasoning for the detail panel [33m 1147[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mrestatement[2m > [22mbumps last_confirmed_at without inserting a row [33m 1572[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mrestatement[2m > [22mappends evidence rather than replacing it [33m 1131[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mrestatement[2m > [22mdoes not add the same message to evidence twice [33m 1837[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mrestatement[2m > [22mnever drags the confirmation date backwards [33m 1865[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mrestatement[2m > [22mmerges a holder claim restated about the same person [33m 2077[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mcontradiction[2m > [22minserts a new row and links the one it replaced [33m 1444[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mcontradiction[2m > [22mleaves the superseded claim's text and evidence intact [33m 2934[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mcontradiction[2m > [22mtreats a transfer of holding as a contradiction [33m 2087[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mcontradiction[2m > [22mdoes not revive a superseded claim when it is mentioned again [33m 2204[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mthe ordering invariant[2m > [22mreaches the same state applied forwards or backwards [33m 4783[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mthe ordering invariant[2m > [22mleaves the later claim active and the earlier one superseded [33m 2194[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mnegation[2m > [22mretires the claim without inserting a replacement [33m 1052[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mnegation[2m > [22mrecords the message that ended it as evidence [33m 1454[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mnegation[2m > [22mrecords nothing when ending an arrangement the register never held [33m 892[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mhearsay[2m > [22mis recorded unverified, so detection cannot see it [33m 1845[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mhearsay[2m > [22mstays unverified even when the Curator was confident it read it right [33m 1491[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mconsequence and the approval gate[2m > [22mholds a high-consequence claim on weak evidence pending approval [33m 1863[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mconsequence and the approval gate[2m > [22macts directly on a high-consequence claim that is well evidenced [33m 1119[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mconsequence and the approval gate[2m > [22mrecords low-consequence uncertainty without asking anyone [33m 1600[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mconsequence and the approval gate[2m > [22mlinks the claim to its asset [33m 579[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mdeadlines resolve against the group's timezone[2m > [22mreads a date as local midnight, not UTC midnight [33m 456[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mdeadlines resolve against the group's timezone[2m > [22mreturns null for an absent deadline [33m 486[2mms[22m[39m
+   [33m[2m✓[22m[39m facts[2m > [22mdeadlines resolve against the group's timezone[2m > [22mreturns null rather than an invalid date for malformed model output [33m 416[2mms[22m[39m
+ [32m✓[39m test/lifecycle.test.ts [2m([22m[2m27 tests[22m[2m)[22m[33m 15100[2mms[22m[39m
+   [33m[2m✓[22m[39m membership lifecycle[2m > [22mrecords a departure and asks for a brief [33m 1266[2mms[22m[39m
+   [33m[2m✓[22m[39m membership lifecycle[2m > [22mrecords an arrival and asks for a brief [33m 417[2mms[22m[39m
+   [33m[2m✓[22m[39m membership lifecycle[2m > [22mdoes not ask for a brief when nobody came or went [33m 453[2mms[22m[39m
+   [33m[2m✓[22m[39m membership lifecycle[2m > [22mreactivates a rejoining volunteer and clears their departure [33m 434[2mms[22m[39m
+   [33m[2m✓[22m[39m membership lifecycle[2m > [22mcreates the person if the first thing Baton sees of them is their arrival [33m 393[2mms[22m[39m
+   [33m[2m✓[22m[39m membership lifecycle[2m > [22mcounts only current members [33m 503[2mms[22m[39m
+   [33m[2m✓[22m[39m membership lifecycle[2m > [22mknows which bot statuses can receive membership events at all [33m 417[2mms[22m[39m
+   [33m[2m✓[22m[39m the introduction[2m > [22mis sent once when Baton is added [33m 985[2mms[22m[39m
+   [33m[2m✓[22m[39m the introduction[2m > [22mis never sent twice for the same chat [33m 433[2mms[22m[39m
+   [33m[2m✓[22m[39m the introduction[2m > [22mrecords the chat it introduced itself to [33m 417[2mms[22m[39m
+   [33m[2m✓[22m[39m the introduction[2m > [22mintroduces itself separately in a second chat [33m 422[2mms[22m[39m
+   [33m[2m✓[22m[39m the introduction[2m > [22msays nothing when Baton is removed [33m 392[2mms[22m[39m
+   [33m[2m✓[22m[39m the introduction[2m > [22mnames what it does not record, not only what it does [33m 403[2mms[22m[39m
+   [33m[2m✓[22m[39m app settings[2m > [22mreturns IST rather than UTC before it is seeded [33m 677[2mms[22m[39m
+   [33m[2m✓[22m[39m app settings[2m > [22mseeds from configuration [33m 429[2mms[22m[39m
+   [33m[2m✓[22m[39m app settings[2m > [22mdoes not clobber a value already set on a later start [33m 572[2mms[22m[39m
+   [33m[2m✓[22m[39m app settings[2m > [22mkeeps one row however many times it is seeded [33m 418[2mms[22m[39m
+   [33m[2m✓[22m[39m app settings[2m > [22massigns the coordinator, who is the only person who may approve [33m 430[2mms[22m[39m
+   [33m[2m✓[22m[39m what an edit costs the register[2m > [22msupersedes a claim whose only support was the edited text [33m 666[2mms[22m[39m
+   [33m[2m✓[22m[39m what an edit costs the register[2m > [22msupersedes a claim with no accumulated evidence at all [33m 397[2mms[22m[39m
+   [33m[2m✓[22m[39m what an edit costs the register[2m > [22mkeeps a claim a later message also supports [33m 385[2mms[22m[39m
+   [33m[2m✓[22m[39m what an edit costs the register[2m > [22mleaves claims from other messages alone [33m 455[2mms[22m[39m
+   [33m[2m✓[22m[39m what an edit costs the register[2m > [22mdoes not touch a claim already superseded [33m 385[2mms[22m[39m
+   [33m[2m✓[22m[39m what an edit costs the register[2m > [22mis safe to run for a message that produced nothing [33m 509[2mms[22m[39m
+   [33m[2m✓[22m[39m the intake loop driving the real lifecycle handlers[2m > [22mturns a polled departure into a departed volunteer [33m 408[2mms[22m[39m
+   [33m[2m✓[22m[39m the intake loop driving the real lifecycle handlers[2m > [22mintroduces itself once across two polls [33m 395[2mms[22m[39m
+   [33m[2m✓[22m[39m the intake loop driving the real lifecycle handlers[2m > [22mre-curates an edited message and drops what the old text claimed [33m 636[2mms[22m[39m
+ [32m✓[39m test/derivation.test.ts [2m([22m[2m37 tests[22m[2m)[22m[33m 22396[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mholdings as history[2m > [22mopens a holding on the first record of who holds something [33m 470[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mholdings as history[2m > [22mcloses one row and opens another when an asset changes hands [33m 439[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mholdings as history[2m > [22mchanges nothing when the same holder is stated again [33m 352[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mholdings as history[2m > [22mcounts an unowned open row as no holder at all [33m 326[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mholdings as history[2m > [22mreleases a person's holdings only when explicitly asked [33m 504[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mcommitments[2m > [22mrecords a dated promise with its deadline at local midnight [33m 549[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mcommitments[2m > [22mrecords an undated intention, and says it is undated [33m 569[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mcommitments[2m > [22mrecords an unowned intent rather than guessing who promised [33m 636[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mcommitments[2m > [22mleaves a commitment unowned when the promiser could not be identified [33m 386[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mcommitments[2m > [22mlists open commitments, oldest first [33m 2210[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mnoticing a promise was kept[2m > [22mcloses a promise the owner reports as done [33m 859[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mnoticing a promise was kept[2m > [22mneeds completion language, not just the subject matter [33m 439[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mnoticing a promise was kept[2m > [22mdoes not let one person close another's promise [33m 604[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mnoticing a promise was kept[2m > [22mlets anyone close an unowned intent [33m 3886[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mnoticing a promise was kept[2m > [22mnever closes a promise with a message that predates it [33m 793[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mnoticing a promise was kept[2m > [22mdoes nothing for a message with no text [33m 558[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mnoticing a promise was kept[2m > [22msubstanceOverlap[2m > [22mscores a close paraphrase above the threshold [33m 354[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mnoticing a promise was kept[2m > [22msubstanceOverlap[2m > [22mscores an unrelated report below it [33m 443[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mnoticing a promise was kept[2m > [22msubstanceOverlap[2m > [22mscores a bare acknowledgement at zero [33m 417[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mnoticing a promise was kept[2m > [22msubstanceOverlap[2m > [22mis zero when the promise has no content words to match [33m 463[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mnoticing a promise was kept[2m > [22msubstanceOverlap[2m > [22mmatches across tense, because a promise and its fulfilment differ in tense [33m 442[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mnoticing a promise was kept[2m > [22msubstanceOverlap[2m > [22mmatches across singular and plural [33m 424[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mcapability coverage[2m > [22mrecords everyone a thanks-list named [33m 461[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mcapability coverage[2m > [22mkeeps one row per person however many times they are seen [33m 637[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mcapability coverage[2m > [22mwidens the observation window in whichever direction the message falls [33m 826[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mcapability coverage[2m > [22mdoes not record the same message as evidence twice [33m 485[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mcapability coverage[2m > [22mreports exactly one participant, which is the capability sole_holder case [33m 803[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mcapability coverage[2m > [22mrecords nothing for an empty participant list [33m 472[2mms[22m[39m
+   [33m[2m✓[22m[39m derivation[2m > [22mcapability coverage[2m > [22mhas no column that could count or rank anyone [33m 467[2mms[22m[39m

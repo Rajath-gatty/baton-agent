@@ -1,0 +1,69 @@
+# What never belongs in a Docker build context.
+#
+# All three Dockerfiles take the REPOSITORY ROOT as their context, because
+# packages/core is a workspace dependency of every app. Without this file that
+# context is the entire working tree — including every node_modules, every build
+# output, and .env — and Coolify builds on the VM, so all of it is shipped to the
+# daemon on every deploy.
+#
+# Four distinct failures are prevented here, in increasing order of nastiness.
+
+# ── 1. Secrets ────────────────────────────────────────────────────────────────
+# No Dockerfile copies .env today; they all copy explicit paths and none uses
+# `COPY . .`. This is the guard for the day one of them does. A bot token and a
+# MODEL_API_KEY committed into an image layer pushed to ECR cannot be undone by
+# rebuilding — the only remedy is rotating the credentials.
+.env
+.env.*
+!.env.example
+
+# ── 2. Stale build output, which is the subtle one ────────────────────────────
+# `COPY packages/core packages/core` is a directory copy, so it would bring the
+# host's dist AND .tsbuildinfo into the build stage. `tsc --build` consults
+# .tsbuildinfo to decide what needs recompiling; a stale one convinces it
+# everything is current, so it skips the build and leaves the stale dist in the
+# image. Core's exports resolve to dist, so that image then serves the PREVIOUS
+# API without erroring — the same failure that had apps/agent passing against an
+# outdated core, except inside a container whose logs are read through CloudWatch.
+#
+# The images build core themselves. Nothing compiled on the host should travel.
+dist
+**/dist
+*.tsbuildinfo
+**/*.tsbuildinfo
+.next
+**/.next
+
+# ── 3. Dependencies ──────────────────────────────────────────────────────────
+# These directories exist for apps/agent, apps/worker and packages/core, so the
+# directory copies above would pick them up. Under pnpm they are symlink farms
+# pointing into node_modules/.pnpm, landing on top of the `pnpm install` the deps
+# stage already ran. Best case dead weight; worst case a stale symlink shadows a
+# correctly installed dependency and produces a resolution error that reproduces
+# on no other machine. Each image installs from pnpm-lock.yaml instead.
+node_modules
+**/node_modules
+.pnpm-store
+
+# ── 4. Weight ────────────────────────────────────────────────────────────────
+# Coolify builds on the VM, where free memory is already a recorded risk for the
+# Next.js production build. None of this is needed to build any image:
+#   docs/hackathon-ideas.json   ~6.6 MB
+#   scripts/out/                the rendered transcript, ~834 KB, derived
+docs
+scripts/out
+.git
+.github
+.codegraph
+
+# Database dumps — the golden reset point is large and belongs nowhere near an image.
+*.dump
+*.pgdump
+dumps
+golden.sql
+
+# Editor and OS noise.
+.vscode
+.idea
+.DS_Store
+Thumbs.db

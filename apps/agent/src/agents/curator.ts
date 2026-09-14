@@ -28,7 +28,7 @@ import {
   type IngestPayload,
 } from "@baton/core";
 import { callStructured } from "../model/structured.js";
-import { buildInput, section, type AgentDeps } from "./shared.js";
+import { buildInput, factoryOption, section, type AgentDeps } from "./shared.js";
 
 export class CuratorBatchMismatch extends Error {
   constructor(missing: readonly string[], unexpected: readonly string[]) {
@@ -72,6 +72,7 @@ export async function runCurator(
     schema: curatorOutputSchema,
     config: deps.config,
     trace: deps.trace,
+    ...factoryOption(deps),
     // No tools. See the note above.
     reasoningOf: (value) => {
       const extracted = value.results.reduce((total, result) => total + result.records.length, 0);

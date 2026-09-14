@@ -11,7 +11,7 @@
  */
 
 import type { ReactNode } from "react";
-import type { FactStatus } from "@baton/core";
+import type { FactStatus } from "@baton/core/constants";
 import { formatConfidence } from "@/lib/format";
 
 // ── Sheet ──────────────────────────────────────────────────────────────────

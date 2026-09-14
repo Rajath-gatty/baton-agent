@@ -8,10 +8,24 @@
   "types": "./dist/index.d.ts",
   "//": "Exports point at dist, not src, because apps/worker and apps/web run as `node dist/main.js` in their containers. Consequence: core must be built before the apps run, which tsc project references handle for typecheck and the Dockerfiles handle for runtime.",
   "//exports.db/testing": "The integration test harness. A separate entry point, deliberately not re-exported from ./db, so test-only code that truncates every table cannot load in a production container. Note: comment keys must stay OUT of `exports` — Node rejects an exports object mixing '.'-prefixed subpaths with plain keys.",
+  "//exports.env": "The dotenv loader for CLI and dev entry points. A subpath rather than a barrel export because it reads the filesystem: the barrel is imported by `use client` components in apps/web, and a `node:fs` import reachable from a client bundle survives only on tree-shaking. Long-running services must not call it at all — a container silently absorbing a stray .env is how you deploy against the wrong database.",
+  "//exports.constants+redact": "The two entry points a browser bundle may import. The barrel re-exports `normalise.js`, which imports `node:crypto`, so a `use client` component importing the barrel fails the webpack build outright — not tree-shaken away, because webpack resolves the scheme before it shakes anything. `constants.ts` and `redact.ts` have zero imports of their own, so these subpaths are safe by construction rather than by luck, and that is the property to preserve: if either ever grows a Node import, apps/web stops building and the rule has enforced itself.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./constants": {
+      "types": "./dist/constants.d.ts",
+      "default": "./dist/constants.js"
+    },
+    "./redact": {
+      "types": "./dist/redact.d.ts",
+      "default": "./dist/redact.js"
+    },
+    "./env": {
+      "types": "./dist/env.d.ts",
+      "default": "./dist/env.js"
     },
     "./db": {
       "types": "./dist/db/index.d.ts",
@@ -35,7 +49,7 @@
     }
   },
   "scripts": {
-    "typecheck": "tsc --build",
+    "typecheck": "tsc --build && tsc -p tsconfig.test.json",
     "build": "tsc --build",
     "test": "vitest run",
     "db:generate": "tsc --build && drizzle-kit generate",

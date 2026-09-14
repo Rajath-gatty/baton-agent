@@ -151,6 +151,9 @@ export const facts: Fact[] = [
     supersedes: "f-clinic-v2",
     topic: "Clinic — Dr Rao",
     recordedAt: "2026-08-27T18:05:00+05:30",
+    curatorReasoning:
+      "Final, explicit terms stated by the volunteer who negotiated them; the price, the days and the emergency arrangement are all named, so the claim stands on its own without the earlier messages.",
+    provenanceWithdrawn: false,
   },
   {
     id: "f-clinic-v2",
@@ -161,6 +164,9 @@ export const facts: Fact[] = [
     supersedes: "f-clinic-v1",
     topic: "Clinic — Dr Rao",
     recordedAt: "2026-05-19T09:43:00+05:30",
+    curatorReasoning:
+      "A revision of the standing terms, stated as a change rather than a restatement, so it replaced the earlier claim instead of confirming it.",
+    provenanceWithdrawn: false,
   },
   {
     id: "f-clinic-v1",
@@ -171,6 +177,9 @@ export const facts: Fact[] = [
     supersedes: null,
     topic: "Clinic — Dr Rao",
     recordedAt: "2026-03-04T11:24:00+05:30",
+    curatorReasoning:
+      "A durable arrangement with a named counterparty and a stated price — the kind of thing the group will still need to know after whoever arranged it has gone.",
+    provenanceWithdrawn: false,
   },
   {
     id: "f-insta",
@@ -180,6 +189,9 @@ export const facts: Fact[] = [
     supersedes: null,
     topic: "Public presence — Instagram",
     recordedAt: "2026-02-11T20:17:00+05:30",
+    curatorReasoning:
+      "The account handle is a durable fact about the organisation's public presence. The credential in the same message was not stored: the register records who holds a secret, never the secret.",
+    provenanceWithdrawn: false,
   },
   {
     id: "f-upi",
@@ -189,6 +201,9 @@ export const facts: Fact[] = [
     supersedes: null,
     topic: "Financial control — donations",
     recordedAt: "2026-07-02T13:32:00+05:30",
+    curatorReasoning:
+      "A payment handle the organisation's donors already use. Recorded because losing it would sever the group from its own income.",
+    provenanceWithdrawn: false,
   },
   {
     id: "f-80g",
@@ -199,6 +214,9 @@ export const facts: Fact[] = [
     supersedes: null,
     topic: "Document — 80G renewal",
     recordedAt: "2026-09-01T10:07:00+05:30",
+    curatorReasoning:
+      "A dated obligation with a named holder and a fixed deadline, which is what makes it checkable later rather than an intention.",
+    provenanceWithdrawn: false,
   },
   {
     id: "f-rent-hearsay",
@@ -209,6 +227,9 @@ export const facts: Fact[] = [
     supersedes: null,
     topic: "Shelter — Hennur",
     recordedAt: "2026-09-05T19:22:00+05:30",
+    curatorReasoning:
+      "Relayed second-hand from someone outside the group, so it was recorded unverified: it stays out of every detection query until the group confirms it first-hand.",
+    provenanceWithdrawn: false,
   },
   {
     id: "f-mou-pending",
@@ -219,6 +240,9 @@ export const facts: Fact[] = [
     supersedes: null,
     topic: "Relationship — BBMP",
     recordedAt: "2026-09-10T15:46:00+05:30",
+    curatorReasoning:
+      "Readable as a proposal rather than a settled arrangement, and it concerns who holds a municipal relationship — high consequence on weak evidence, so it is held for approval instead of entered.",
+    provenanceWithdrawn: false,
   },
   {
     id: "f-feeding",
@@ -228,6 +252,9 @@ export const facts: Fact[] = [
     supersedes: null,
     topic: "Route — Koramangala feeding",
     recordedAt: "2026-08-16T07:32:00+05:30",
+    curatorReasoning:
+      "A hand-off of a standing route, stated plainly by the person taking it on, which changes who has been seen doing the thing.",
+    provenanceWithdrawn: false,
   },
 ];
 
@@ -242,6 +269,7 @@ export const assets: Asset[] = [
     label: "Instagram — @streetpaws.blr",
     description: "The group's only public channel; ~9k followers, source of most adoptions.",
     recordedAt: "2026-02-11T20:17:00+05:30",
+    factId: "f-insta",
   },
   {
     id: "a-insta-login",
@@ -250,6 +278,7 @@ export const assets: Asset[] = [
     label: "Instagram login",
     description: "The credentials that control the @streetpaws.blr account.",
     recordedAt: "2026-02-11T20:17:00+05:30",
+    factId: "f-insta",
   },
   {
     id: "a-van",
@@ -258,6 +287,7 @@ export const assets: Asset[] = [
     label: "Rescue transport — Whitefield drives",
     description: "A vehicle relied on for the Whitefield rescue runs.",
     recordedAt: "2026-08-30T16:49:00+05:30",
+    factId: null,
   },
   {
     id: "a-upi",
@@ -266,6 +296,7 @@ export const assets: Asset[] = [
     label: "Donation UPI — streetpaws@okhdfc",
     description: "Where all public donations land.",
     recordedAt: "2026-07-02T13:32:00+05:30",
+    factId: "f-upi",
   },
   {
     id: "a-bbmp",
@@ -274,6 +305,7 @@ export const assets: Asset[] = [
     label: "BBMP — ABC drive contact",
     description: "The municipal contact permitting the animal birth-control drives.",
     recordedAt: "2026-09-10T15:46:00+05:30",
+    factId: "f-mou-pending",
   },
   {
     id: "a-80g",
@@ -282,6 +314,7 @@ export const assets: Asset[] = [
     label: "80G renewal paperwork",
     description: "The tax-exemption certificate the group's donors rely on.",
     recordedAt: "2026-09-01T10:07:00+05:30",
+    factId: "f-80g",
   },
 ];
 
@@ -554,7 +587,10 @@ export const quietDecisions: QuietDecision[] = [
 ];
 
 // ── briefs ──────────────────────────────────────────────────────────────────
-// Two briefs, one unread, each with the three fixed sections.
+// Three briefs across both variants: a departure (unread), an arrival, and a
+// period close. Each carries the three fixed sections, and the two person-subject
+// briefs differ on `canDirectMessage` on purpose — one subject has written to the
+// bot before and one has not, so the interface has to render both honestly.
 
 export const briefs: Brief[] = [
   {
@@ -587,6 +623,44 @@ export const briefs: Brief[] = [
         },
       ],
     },
+    subject: {
+      // Left the group and never opened a chat with the bot, so Telegram forbids
+      // writing to them first. The copyable text is the whole remedy [F24].
+      name: "Priya Menon",
+      canDirectMessage: false,
+    },
+  },
+  {
+    id: "b-meera",
+    title: "Meera joined — 16 Aug",
+    trigger: "A volunteer joined the group.",
+    generatedAt: "2026-08-16T08:15:00+05:30",
+    read: true,
+    sections: {
+      only_they_held: [
+        {
+          text: "The Instagram account rests with one pair of hands and could use a second.",
+          factId: "f-insta",
+        },
+      ],
+      they_had_promised: [
+        {
+          text: "Nothing is owed by anyone arriving; this section is empty on an arrival by design.",
+          factId: null,
+        },
+      ],
+      nobody_else_seen: [
+        {
+          text: "The BBMP drive arrangement has no one seen holding it at all.",
+          factId: "f-mou-pending",
+        },
+      ],
+    },
+    subject: {
+      // Has written to the bot, so a direct message is possible.
+      name: "Meera Joshi",
+      canDirectMessage: true,
+    },
   },
   {
     id: "b-quarter",
@@ -614,6 +688,7 @@ export const briefs: Brief[] = [
         },
       ],
     },
+    subject: null,
   },
 ];
 

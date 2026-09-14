@@ -265,7 +265,7 @@ describe("the processing loop", () => {
         return {
           curator: { results },
           cartographer: {
-            attributions: results.map((result, index) => ({
+            attributions: results.map((_result, index) => ({
               recordIndex: index,
               mention: index === 0 ? "Meera" : "Anil",
               resolution: "resolved" as const,

@@ -25,15 +25,35 @@ const BOT_ID = 8871830879;
 const options = { chatId: CHAT_ID, botUserId: BOT_ID };
 
 /** A plain group message from a volunteer. */
-function message(overrides: Partial<TelegramMessage> = {}): TelegramMessage {
-  return {
+/**
+ * Builds a Telegram message, where an override of `undefined` means **the key is
+ * absent** rather than present and undefined.
+ *
+ * The distinction matters because `exactOptionalPropertyTypes` is on and because it
+ * is what Telegram actually does: a photo message has no `text` key at all, and a
+ * channel post has no `from`. A fixture that set the key to `undefined` would be
+ * testing a shape the API never sends.
+ */
+function message(
+  overrides: { [K in keyof TelegramMessage]?: TelegramMessage[K] | undefined } = {},
+): TelegramMessage {
+  const built: Record<string, unknown> = {
     message_id: 4021,
     from: { id: 588068795, first_name: "Priya", last_name: "Raghavan", username: "priya_pc" },
     date: 1_776_000_000,
     chat: { id: CHAT_ID, type: "supergroup", title: "Paws & Claws" },
     text: "Sunrise Clinic lets us settle at month end",
-    ...overrides,
   };
+
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value === undefined) {
+      delete built[key];
+    } else {
+      built[key] = value;
+    }
+  }
+
+  return built as unknown as TelegramMessage;
 }
 
 function update(overrides: Partial<TelegramUpdate> = {}): TelegramUpdate {

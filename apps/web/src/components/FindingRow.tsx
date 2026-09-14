@@ -3,10 +3,12 @@
 /**
  * One finding, as a ruled chart row — not a padded card.
  *
- * The card was rejected on purpose: seven findings, the state line and the
- * quiet strip all have to sit inside a 1440×900 first viewport, and cards would
- * push the strip below the fold. So a finding is a dense CSS-grid row on a
- * hairline rule, the same visual grammar as a reservation chart.
+ * The card was rejected on purpose: seven findings, the state line and the quiet
+ * strip all have to sit inside a 1440×900 first viewport, and cards would push the
+ * strip below the fold. So a finding is a dense CSS-grid row on a hairline rule,
+ * the same visual grammar as a reservation chart, and its three lines and their
+ * paddings are tuned to that budget rather than chosen for comfort — the numbers
+ * below were measured against the fold, not picked.
  *
  * The hierarchy inside the row is deliberate and is the product's third truth
  * made structural: the capability is the subject and reads large; the holder is
@@ -80,8 +82,12 @@ export function FindingRow({ finding }: { finding: Finding }) {
       style={{
         gridTemplateColumns: GRID_TEMPLATE,
         columnGap: "1rem",
-        paddingTop: "0.4375rem",
-        paddingBottom: "0.4375rem",
+        // Tight on purpose, and measured rather than guessed: seven of these rows,
+        // the state line and the quiet strip have to fall inside a 1440×900 first
+        // viewport, and at the previous 0.4375rem the strip sat 300px below the
+        // fold. The row is three short lines, not a card.
+        paddingTop: "0.1875rem",
+        paddingBottom: "0.1875rem",
       }}
     >
       {/* Subject column: the capability, then the one line of why-it-matters,
@@ -92,7 +98,7 @@ export function FindingRow({ finding }: { finding: Finding }) {
           style={{
             fontSize: "var(--text-lead)",
             fontWeight: 600,
-            lineHeight: 1.25,
+            lineHeight: 1.15,
             color: "var(--color-ink)",
           }}
         >
@@ -101,10 +107,9 @@ export function FindingRow({ finding }: { finding: Finding }) {
         <p
           title={finding.whyItMatters}
           style={{
-            fontSize: "var(--text-dense)",
+            fontSize: "var(--text-meta)",
             color: "var(--color-ink-muted)",
-            marginTop: "0.125rem",
-            lineHeight: 1.35,
+            lineHeight: 1.3,
             display: "-webkit-box",
             WebkitLineClamp: 1,
             WebkitBoxOrient: "vertical",
@@ -115,9 +120,9 @@ export function FindingRow({ finding }: { finding: Finding }) {
         </p>
         <p
           style={{
-            fontSize: "var(--text-meta)",
+            fontSize: "var(--text-label)",
+            lineHeight: 1.3,
             color: "var(--color-ink-faint)",
-            marginTop: "0.1875rem",
           }}
         >
           {/* Evidence count is the clickable thread to provenance when a fact

@@ -18,7 +18,10 @@ import * as schema from "../src/db/schema.js";
  */
 
 const tables = new Map(
-  Object.values(schema)
+  // Widened to `unknown[]` before filtering: the schema barrel exports enums and
+  // relations alongside tables, so the union of its values does not admit `PgTable`
+  // as a narrowing target without this.
+  (Object.values(schema) as unknown[])
     .filter((value): value is PgTable => is(value, PgTable))
     .map((table) => [getTableName(table), table] as const),
 );

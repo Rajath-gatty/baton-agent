@@ -17,11 +17,18 @@
  * rendered transcript, which is derived and gitignored. The placement text in the fixture
  * is the same string the renderer emits verbatim, so this needs no generated artifact and
  * runs on a fresh clone.
+ *
+ * **Scope, deliberately narrow.** Rule-level behaviour — which signal fires, the recall
+ * floor over a labelled corpus, keep-rate bounds, reaction-before-signal ordering — is
+ * owned by `packages/core/test/prefilter.test.ts`, beside the implementation. This file
+ * asserts only what that one cannot: that the filter, whatever its rules, does not drop
+ * the material the seeded demo depends on. Two files asserting the same rules is how they
+ * come to disagree.
  */
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { keepSignals, prefilter, PREFILTER_VERSION } from "@baton/core/intake";
+import { prefilter, PREFILTER_VERSION } from "@baton/core";
 import { PLAN_FIXTURE_PATH } from "../src/seed/paths.js";
 
 interface Placement {
@@ -41,13 +48,17 @@ const plan = JSON.parse(readFileSync(PLAN_FIXTURE_PATH, "utf8")) as {
 /**
  * Calls the filter the way the pipeline does.
  *
- * Media kind matters: a voice note is kept because it *is* media, not because of its
- * caption, and omitting it here would test a call the normaliser never makes.
+ * `isUnprocessed` is derived exactly as `fromRenderedMessage` derives it — media
+ * present *and* no text to read. Deriving it differently here would test a call the
+ * seed adapter never makes, which is the whole failure this file exists to catch: a
+ * placement carrying a caption must be judged on that caption, not dismissed as an
+ * unreadable file.
  */
 function filter(placement: Placement) {
+  const hasText = placement.text.trim() !== "";
   return prefilter({
-    text: placement.text,
-    mediaKind: placement.flags.media ?? null,
+    text: hasText ? placement.text : null,
+    isUnprocessed: placement.flags.media !== undefined && !hasText,
   });
 }
 
@@ -71,7 +82,9 @@ describe("pre-filter recall over planted material", () => {
 
       expect(
         result.verdict,
-        `Discarded, losing coverage [${placement.coverage.join(", ")}]. Note: ${placement.note}`,
+        `Discarded (reason: ${result.reason}), losing coverage [${placement.coverage.join(
+          ", ",
+        )}]. Note: ${placement.note}`,
       ).toBe("candidate");
     },
   );
@@ -110,70 +123,32 @@ describe("pre-filter recall over planted material", () => {
   });
 });
 
-describe("pre-filter precision", () => {
-  it("discards bare acknowledgements even though 'thanks' is a participation signal", () => {
-    // Ordering inside `prefilter` is what makes this pass: the acknowledgement check runs
-    // before the signals, or every "thanks" in the chat becomes a candidate.
-    for (const text of ["ok", "thanks", "thank you", "got it", "on it", "👍", "haha"]) {
-      expect(prefilter({ text }).verdict, text).toBe("discarded");
+describe("the placements are judged on their text, not on their attachments", () => {
+  // These two assertions are about the seam between the plan fixture and the seed
+  // adapter, which is why they live here rather than in core. `isUnprocessed` is the
+  // one input this file synthesises, so it is the one input it can get wrong.
+
+  it("never dismisses a text-bearing placement as unreadable media", () => {
+    // A `no_text` verdict on a placement that has words in it means the derivation
+    // above is wrong — the caption was thrown away and the coverage row it carries
+    // went with it, silently.
+    const wrongly = plan.placements.filter(
+      (placement) => placement.text.trim() !== "" && filter(placement).reason === "no_text",
+    );
+
+    expect(wrongly.map((placement) => `${placement.id}: ${placement.note}`)).toEqual([]);
+  });
+
+  it("judges a captioned attachment on its caption", () => {
+    // The media coverage row is carried by placements that have both an attachment and
+    // text. Under the adapter's rule they are not `unprocessed`, so the caption is
+    // curated normally and the flag marks only a genuinely unreadable file.
+    const captioned = plan.placements.filter(
+      (placement) => placement.flags.media !== undefined && placement.text.trim() !== "",
+    );
+
+    for (const placement of captioned) {
+      expect(filter(placement).reason, `${placement.id}: ${placement.note}`).not.toBe("no_text");
     }
-  });
-
-  it("keeps a thanks-list, which is real participation evidence", () => {
-    expect(prefilter({ text: "thanks to Ravi and Meera for the vet run today" }).verdict).toBe(
-      "candidate",
-    );
-  });
-
-  it("does not keep a message on a date word alone", () => {
-    // A temporal reference is supporting, not triggering. Promoting it took the keep rate
-    // to 81% against a design target of roughly one in five.
-    expect(prefilter({ text: "Six calls today, four were about the same dog." }).verdict).toBe(
-      "discarded",
-    );
-  });
-
-  it("does not keep a message on length alone", () => {
-    expect(
-      prefilter({
-        text: "the beagle from the gate has been adopted! family came back a second time and everything",
-      }).verdict,
-    ).toBe("discarded");
-  });
-
-  it("keeps the same words once an asset is named", () => {
-    // The pair that shows why temporal reference is supporting rather than triggering.
-    expect(prefilter({ text: "the van insurance is due next Tuesday" }).verdict).toBe("candidate");
-  });
-});
-
-describe("pre-filter signals", () => {
-  it("keeps media with no caption, so the gap stays visible", () => {
-    const result = prefilter({ text: null, mediaKind: "voice" });
-    expect(result.verdict).toBe("candidate");
-    expect(result.signals).toContain("media");
-  });
-
-  it("discards an empty message with no media", () => {
-    expect(prefilter({ text: "   " }).verdict).toBe("discarded");
-  });
-
-  it("keeps a spaced Indian mobile number", () => {
-    // Ten consecutive digits was the original pattern, and it missed how a number is
-    // actually written — including the planted emergency number.
-    expect(keepSignals("call +91 98450 33221 if nobody answers")).toContain("contact_detail");
-  });
-
-  it("keeps a figure with a unit, which a bare number would not earn", () => {
-    expect(keepSignals("we are running at 62 animals a month")).toContain("figure");
-    expect(keepSignals("62 of them")).not.toContain("figure");
-  });
-
-  it("recognises reported speech, which becomes unverified hearsay", () => {
-    expect(keepSignals("Kavya told me the vet said to wait ten days")).toContain("reported_speech");
-  });
-
-  it("recognises a termination, which retires a fact rather than superseding it", () => {
-    expect(keepSignals("Green Paws are not renewing the sponsorship")).toContain("termination");
   });
 });

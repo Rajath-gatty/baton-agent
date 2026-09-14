@@ -80,6 +80,22 @@ export interface Fact {
   /** The topic this fact belongs to, e.g. "Clinic — Dr Rao". */
   topic: string;
   recordedAt: IsoTimestamp;
+  /**
+   * The Curator's own account of why this was kept — `facts.curator_reasoning`
+   * in the schema. Null when the fact was written by the worker's deterministic
+   * path rather than by a model, in which case the panel states the register's
+   * rule for that status rather than inventing a reason.
+   */
+  curatorReasoning: string | null;
+  /**
+   * Whether the coordinator has withdrawn this claim's provenance.
+   *
+   * Telegram reports no deletions [F4], so a volunteer who deletes a message
+   * leaves Baton still quoting it. This is the coordinator's only remedy: the
+   * quote stops being shown while the fact, its status and its trail stay on the
+   * record — deleting the fact outright would be a worse lie than a stale quote.
+   */
+  provenanceWithdrawn: boolean;
 }
 
 /**
@@ -121,6 +137,14 @@ export interface Asset {
   label: string;
   description: string;
   recordedAt: IsoTimestamp;
+  /**
+   * The fact whose claim put this asset on the register, if one did. Present so
+   * a row in the inventory is a traceable claim rather than a bare label — the
+   * inventory must be one gesture from provenance like every other surface.
+   * Null when the asset was inferred from holdings alone; the row then renders
+   * as plain text rather than manufacturing a link to the wrong thing.
+   */
+  factId: string | null;
 }
 
 /**
@@ -142,6 +166,21 @@ export interface BriefLine {
   factId: string | null;
 }
 
+/**
+ * The person a brief is *about* — the volunteer whose arrival or departure
+ * triggered it — and whether Baton can reach them directly.
+ *
+ * `canDirectMessage` is false unless that person has previously opened a chat
+ * with the bot, because Telegram forbids a bot writing first [F24]. The
+ * distinction is surfaced rather than hidden: a disabled button with the reason
+ * beside it is honest, while a button that silently fails is not. The copyable
+ * text is offered either way, so the coordinator is never blocked.
+ */
+export interface BriefSubject {
+  name: string;
+  canDirectMessage: boolean;
+}
+
 /** A brief: what changed about the organisation's exposure, in three sections. */
 export interface Brief {
   id: string;
@@ -151,6 +190,9 @@ export interface Brief {
   trigger: string;
   generatedAt: IsoTimestamp;
   read: boolean;
+  /** Who the brief concerns, and whether they are reachable. Null for a brief
+   * triggered by a period rather than a person. */
+  subject: BriefSubject | null;
   /** The three fixed sections, keyed by `BriefSection`, order fixed by core. */
   sections: Record<BriefSection, BriefLine[]>;
 }

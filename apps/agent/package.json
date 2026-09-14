@@ -7,9 +7,9 @@
   "scripts": {
     "dev": "tsx watch dev.ts",
     "start": "node dist/server.js",
-    "typecheck": "tsc --build",
+    "typecheck": "tsc --build && tsc -p tsconfig.test.json",
     "build": "tsc --build",
-    "test": "vitest run --passWithNoTests",
+    "test": "pnpm --filter @baton/core build && vitest run --passWithNoTests",
     "smoke:g1": "tsx smoke/g1-provider.ts",
     "smoke:g1-stub": "tsx smoke/g1-stub.ts",
     "smoke:g2": "tsx smoke/g2-structured.ts"

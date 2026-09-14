@@ -12,17 +12,21 @@
  * did the last pass actually do — without ever reaching the surfaces that read
  * as the register itself.
  *
- * Like the fact panel it is a native `<dialog>` opened with `showModal()`, for
- * the same reasons: it is dispatched from a header that scrolls, and the native
+ * Like the fact panel it is a native `<dialog>` opened with `showModal()`, for the
+ * same reasons: it is dispatched from a header that scrolls, and the native
  * element gives Escape-to-close, a backdrop and a focus trap. The slide is a
  * transform on the inner sheet, 200ms, purely to convey that it enters from the
  * edge — no other choreography.
+ *
+ * Its read crosses to the server through `loadLastRun` rather than importing the
+ * data seam: this is a client component, and importing `lib/data.ts` here would
+ * drag the read layer into the browser bundle.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { TraceEntry } from "@baton/core";
 import type { Run } from "@/lib/types";
-import { getLastRun } from "@/lib/data";
+import { loadLastRun } from "@/app/panel-actions";
 import { formatDateTime } from "@/lib/format";
 
 /** The event the header dispatches to open this panel. */
@@ -51,7 +55,7 @@ export function ActivityPanel() {
   const load = useCallback(async () => {
     setPhase({ kind: "loading" });
     try {
-      const run = await getLastRun();
+      const run = await loadLastRun();
       setPhase(run ? { kind: "ready", run } : { kind: "empty" });
     } catch (cause) {
       setPhase({

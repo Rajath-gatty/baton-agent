@@ -28,7 +28,7 @@ import {
   type RespondentOutput,
 } from "@baton/core";
 import { callStructured } from "../model/structured.js";
-import { buildInput, section, type AgentDeps } from "./shared.js";
+import { buildInput, factoryOption, section, type AgentDeps } from "./shared.js";
 import { toolsFor } from "../tools/index.js";
 
 /**
@@ -119,6 +119,7 @@ export async function runRespondent(
     schema: respondentOutputSchema,
     config: deps.config,
     trace: deps.trace,
+    ...factoryOption(deps),
     tools: toolsFor("respondent", { dataApi: deps.dataApi, trace: deps.trace }),
     reasoningOf: (value) => `Answered as '${value.outcome}' from ${value.factIds.length} claim(s).`,
   });

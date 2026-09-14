@@ -27,7 +27,7 @@ import {
   type RestraintOutput,
 } from "@baton/core";
 import { callStructured } from "../model/structured.js";
-import { buildInput, section, type AgentDeps } from "./shared.js";
+import { buildInput, factoryOption, section, type AgentDeps } from "./shared.js";
 
 /** One item put to Restraint. Deliberately uniform across the three produce paths. */
 export interface RestraintItem {
@@ -83,6 +83,7 @@ export async function runRestraint(
     schema: restraintOutputSchema,
     config: deps.config,
     trace: deps.trace,
+    ...factoryOption(deps),
     // No tools: Restraint judges what it is handed. An agent that could go looking
     // for more evidence would be second-guessing the item rather than gating it.
     reasoningOf: (value) => {

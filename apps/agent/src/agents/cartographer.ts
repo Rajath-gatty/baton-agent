@@ -25,7 +25,7 @@ import {
 } from "@baton/core";
 import { callStructured } from "../model/structured.js";
 import { AliasIndex, needsEscalation, type AliasMatch } from "./alias-match.js";
-import { buildInput, section, type AgentDeps } from "./shared.js";
+import { buildInput, factoryOption, section, type AgentDeps } from "./shared.js";
 import { toolsFor } from "../tools/index.js";
 
 /** A mention pulled out of an extracted record, with its position preserved. */
@@ -145,6 +145,7 @@ export async function runCartographer(
     schema: cartographerOutputSchema,
     config: deps.config,
     trace: deps.trace,
+    ...factoryOption(deps),
     tools: toolsFor("cartographer", { dataApi: deps.dataApi, trace: deps.trace }),
     reasoningOf: (value) => {
       const unresolved = value.attributions.filter(
